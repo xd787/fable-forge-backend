@@ -25,13 +25,13 @@ router.post("/signup", (req, res) => {
         email: req.body.email,
         password: hash,
         token: uid2(32),
-        histoires: [],
-        abonnement: false,
-        payment: null,
+        stories : [], // tableau de ID stories
+        subscription: false, 
+        paymentMethod: null,
       });
 
       newUser.save().then((newDoc) => {
-        res.json({ result: true, token: newDoc.token });
+        res.json({ result: true, token: newDoc.token});
       });
     } else {
       // User already exists in database
@@ -54,6 +54,7 @@ router.post("/signin", (req, res) => {
         token: data.token,
         username: data.username,
         firstname: data.firstname,
+        email: data.email,
       });
     } else {
       res.json({ result: false, error: "User not found or wrong password" });
@@ -63,8 +64,8 @@ router.post("/signin", (req, res) => {
 
 //DELETE suppression de compte
 
-router.delete("/:userID", (req, res) => {
-  User.deleteOne({ _id: req.params.userID }).then((deletedDoc) => {
+router.delete("/", (req, res) => {
+  User.deleteOne({token: req.body.token }).then((deletedDoc) => {
     if (deletedDoc.deletedCount > 0) {
       // User successfully deleted
       User.find().then((data) => {
@@ -79,32 +80,43 @@ router.delete("/:userID", (req, res) => {
 //PUT modifier les infos user
 
 router.put("/", (req, res) => {
+  const hash = bcrypt.hashSync(req.body.password, 10);
+
   User.updateOne(
-    { _id: req.body.id },
+    {token: req.body.token },
     {
       firstname: req.body.firstname,
       username: req.body.username,
       email: req.body.email,
-      password: req.body.password,
+      password: hash,
     }
   ).then((data) => {
     res.json({ data });
   });
 });
 
-//GET avoir la dernière histoire
 
+//GET avoir la dernière histoire
 router.get("/lastStory", (req, res) => {
-  User.findOne({ _id: req.body.id }).then((data) => {
+  User.findOne({ token: req.body.token }).then((data) => {
     res.json({ result: true, stories: data.stories });
   });
 });
 
 //GET toutes les histoires selon l’utilisateur
 router.get("/stories", (req, res) => {
-  User.findOne({ _id: req.body.id }).then((data) => {
+  User.findOne({ token: req.body.token }).then((data) => {
     res.json({ result: true, stories: data.stories });
   });
 });
 
+
+//put abonnement
+router.put("/subscription", (req,res)=> { 
+  User.findOne({token: req.body.token })
+    .then(data => {
+    res.json({result: true, abonnement: data})
+
+  });
+})
 module.exports = router;
