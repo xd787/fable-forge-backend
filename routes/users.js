@@ -13,7 +13,6 @@ router.post("/signup", (req, res) => {
     res.json({ result: false, error: "Missing or empty fields" });
     return;
   }
-
   // Check if the user does not already exist in data base
   User.findOne({ username: req.body.username }).then((data) => {
     if (data === null) {
@@ -25,20 +24,20 @@ router.post("/signup", (req, res) => {
         email: req.body.email,
         password: hash,
         token: uid2(32),
-        stories : [], // tableau de ID stories
+        stories: [], // tableau de ID stories
         subscription: {
           subscriber: false,
           subscriptionName: null,
           subscriptionPrice: 0,
           subscriptionFrequency: null, //hebdomadaire, mensuel, annuel
           subscriptionStartDate: new Date(),
-          subscriptionEndDate: new Date (),
-        }, 
+          subscriptionEndDate: new Date(),
+        },
         paymentMethod: null,
       });
 
       newUser.save().then((newDoc) => {
-        res.json({ result: true, token: newDoc.token});
+        res.json({ result: true, token: newDoc.token });
       });
     } else {
       // User already exists in database
@@ -47,15 +46,25 @@ router.post("/signup", (req, res) => {
   });
 });
 
+
+
 //POST CONNECTION
 router.post("/signin", (req, res) => {
-  if (!checkBody(req.body, ["username", "password"])) {
-    res.json({ result: false, error: "Missing or empty fields" });
-    return;
+  const { identifier, password } = req.body;
+
+  if (!identifier || !password) {
+    return res.json({ result: false, error: "Missing or empty fields" });
   }
 
-  User.findOne({ username: req.body.username }).then((data) => {
-    if (data && bcrypt.compareSync(req.body.password, data.password)) {
+  const isEmail =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+      identifier
+    );
+
+  User.findOne(
+    isEmail ? { email: identifier } : { username: identifier }
+  ).then((data) => {
+    if (data && bcrypt.compareSync(password, data.password)) {
       res.json({
         result: true,
         token: data.token,
@@ -69,10 +78,11 @@ router.post("/signin", (req, res) => {
   });
 });
 
-//DELETE suppression de compte
 
+
+//DELETE suppression de compte
 router.delete("/", (req, res) => {
-  User.deleteOne({token: req.body.token }).then((deletedDoc) => {
+  User.deleteOne({ token: req.body.token }).then((deletedDoc) => {
     if (deletedDoc.deletedCount > 0) {
       // User successfully deleted
       User.find().then((data) => {
@@ -84,13 +94,14 @@ router.delete("/", (req, res) => {
   });
 });
 
-//PUT modifier les infos user
 
+
+//PUT modifier les infos user
 router.put("/", (req, res) => {
   const hash = bcrypt.hashSync(req.body.password, 10);
 
   User.updateOne(
-    {token: req.body.token },
+    { token: req.body.token },
     {
       firstname: req.body.firstname,
       username: req.body.username,
@@ -104,26 +115,31 @@ router.put("/", (req, res) => {
 
 
 //GET avoir la dernière histoire
-router.get("/lastStory", (req, res) => {
-  User.findOne({ token: req.body.token }).then((data) => {
-    res.json({ result: true, stories: data.stories });
+router.get("/lastStory/:token", (req, res) => {
+  User.findOne({ token: req.params.token })
+  .populate('stories')
+  .then((data) => {
+    let lastStories = data.stories[data.stories.length -1]
+    res.json({ result: true, stories: lastStories });
   });
 });
+
 
 //GET toutes les histoires selon l’utilisateur
-router.get("/stories", (req, res) => {
-  User.findOne({ token: req.body.token }).then((data) => {
+router.get("/stories/:token", (req, res) => {
+  User.findOne({ token: req.params.token })
+  .populate('stories')
+  .then((data) => {
     res.json({ result: true, stories: data.stories });
   });
 });
 
 
-//put abonnement
-router.put("/subscription", (req,res)=> { 
-  User.findOne({token: req.body.token })
-    .then(data => {
-    res.json({result: true, abonnement: data})
+// put abonnement
+// router.put("/subscription", (req, res) => {
+//   User.findOne({ token: req.body.token }).then((data) => {
+//     res.json({ result: true, abonnement: data });
+//   });
+// });
 
-  });
-})
 module.exports = router;
