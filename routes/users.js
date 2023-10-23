@@ -26,7 +26,14 @@ router.post("/signup", (req, res) => {
         password: hash,
         token: uid2(32),
         stories : [], // tableau de ID stories
-        subscription: false, 
+        subscription: {
+          subscriber: false,
+          subscriptionName: null,
+          subscriptionPrice: 0,
+          subscriptionFrequency: null, //hebdomadaire, mensuel, annuel
+          subscriptionStartDate: new Date(),
+          subscriptionEndDate: new Date (),
+        }, 
         paymentMethod: null,
       });
 

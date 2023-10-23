@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 require('../models/connection');
 const Genre= require('../models/genre');
-const Subscription = require('../models/subscription');
 
 
 /* GET home page. */

@@ -28,17 +28,21 @@ router.post('/new/:token', (req, res) => {
   User.findOne({ token: req.params.token }).then(data => {
     if (data) {
         const newStory = new Stories({
-            interaction: false,
+            interactivity: false,
             length : req.body.length,
             title : req.body.title,
-            ending : req.body.ending,
-            character: req.body.character,
-            startPlace: req.body.startPlace,
+            endingType : req.body.ending,
+            character:{
+              characterName: null,
+              characterPersonality: [],
+              characterDescription: null,
+              characterImage: null
+            },
+            departureLocation: req.body.startPlace,
             user: data._id,
-            token: uid2(32),
-            done: false,
+            completed: false,
             image: null,
-            prompt: [null]
+            choicePrompt: [{choiceText: null}]
        });
 
         newStory.save().then(newDoc => {

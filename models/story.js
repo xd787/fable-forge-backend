@@ -19,7 +19,6 @@ const storySchema = mongoose.Schema({
     character: characterSchema,//Sous document - character
     departureLocation: String,
     user: [{ type: mongoose.Schema.Types.ObjectId, ref: 'users' }], //clé étrangère
-    storyToken: String,
     completed: Boolean,
     image: String,
     choicePrompt: [choiceSchema],//Sous document - choix
