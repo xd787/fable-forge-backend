@@ -17,12 +17,12 @@ const storySchema = mongoose.Schema({
     length: String,
     title: String,
     endingType: String,
-    character: characterSchema,//Sous document - character
+    character: characterSchema, //Sous document - character
     departureLocation: String,
     user: [{ type: mongoose.Schema.Types.ObjectId, ref: 'users' }], //clé étrangère
     completed: Boolean,
     image: String,
-    choicePrompt: [choiceSchema],//Sous document - choix
+    choicePrompt: [choiceSchema], //Sous document - choice
 });
 
 const Story = mongoose.model('stories', storySchema);
