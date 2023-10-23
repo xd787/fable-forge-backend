@@ -1,6 +1,5 @@
 require('dotenv').config();
 require('./models/connection');
-const Subscription = require('./models/subscription');
 const User = require('./models/user');
 const Genre = require('./models/genre');
 const Story = require('./models/story')
