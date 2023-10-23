@@ -9,7 +9,6 @@ const characterSchema = mongoose.Schema({
 
 const choiceSchema = mongoose.Schema({
     choiceText: String,
-    choiceId: Number,
 });
 
 const storySchema = mongoose.Schema({
