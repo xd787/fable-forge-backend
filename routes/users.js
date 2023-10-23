@@ -135,11 +135,5 @@ router.get("/stories/:token", (req, res) => {
 });
 
 
-// put abonnement
-// router.put("/subscription", (req, res) => {
-//   User.findOne({ token: req.body.token }).then((data) => {
-//     res.json({ result: true, abonnement: data });
-//   });
-// });
 
 module.exports = router;
