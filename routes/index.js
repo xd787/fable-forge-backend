@@ -2,8 +2,7 @@ var express = require('express');
 var router = express.Router();
 require('../models/connection');
 const Genre= require('../models/genre');
-const abonnement= require('../models/abonnement');
-const Abonnement = require('../models/abonnement');
+const Abonnement = require('../models/subscription');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
