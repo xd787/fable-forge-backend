@@ -1,14 +1,12 @@
 const mongoose = require('mongoose');
 
-const baseGenreSchema = mongoose.Schema({
-// A FAIRE 
+const genreSchema = mongoose.Schema({
+    genre: String,
+    image: String,
+    description: String,
+    music: String,
 });
 
-const BaseGenre = mongoose.model('baseGenre', baseGenreSchema);
+const Genre = mongoose.model('genres', genreSchema);
 
-module.exports = BaseGenre;
-
-// nom du genre: String 
-// Image du genre: String 
-// descriptif du genre: String 
-// Musique: String
+module.exports = Genre;

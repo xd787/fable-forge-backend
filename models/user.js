@@ -1,19 +1,18 @@
 const mongoose = require('mongoose');
 
 const userSchema = mongoose.Schema({
-// A FAIRE 
+    firstname: String,
+    username: String,
+    email: String, 
+    password: String,
+    token: String,
+    stories : [], // clé étrangère
+
+    subscription: Boolean, 
+    paymentMethod: String,
 });
 
 const User = mongoose.model('users', userSchema);
 
 module.exports = User;
 
-// firstname: String 
-// username: String
-// Email: String 
-// Password: String
-// Token: String 
-// Histoires : [clé étrangères]
-
-// Abonnement: Booléen 
-// Moyen de paiement: String
