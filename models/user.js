@@ -15,9 +15,8 @@ const userSchema = mongoose.Schema({
     email: String, 
     password: String,
     token: String,
-    stories : [{ type: mongoose.Schema.Types.ObjectId, ref: 'stories' }], // clé étrangère
-
-    subscription: subscriptionSchema,//sous-document
+    stories : [{ type: mongoose.Schema.Types.ObjectId, ref: 'stories' }], //clé étrangère stories
+    subscription: subscriptionSchema, //sous-document subscription
     paymentMethod: String,
 });
 
