@@ -25,13 +25,13 @@ router.post("/signup", (req, res) => {
         email: req.body.email,
         password: hash,
         token: uid2(32),
-        histoires: [],
-        abonnement: false,
-        payment: null,
+        stories : [], // tableau de ID stories
+        subscription: false, 
+        paymentMethod: null,
       });
 
       newUser.save().then((newDoc) => {
-        res.json({ result: true, token: newDoc.token });
+        res.json({ result: true, token: newDoc.token});
       });
     } else {
       // User already exists in database
@@ -95,8 +95,8 @@ router.put("/", (req, res) => {
   });
 });
 
-//GET avoir la dernière histoire
 
+//GET avoir la dernière histoire
 router.get("/lastStory", (req, res) => {
   User.findOne({ token: req.body.token }).then((data) => {
     res.json({ result: true, stories: data.stories });
@@ -110,4 +110,13 @@ router.get("/stories", (req, res) => {
   });
 });
 
+
+//put abonnement
+router.put("/subscription", (req,res)=> { 
+  User.findOne({token: req.body.token })
+    .then(data => {
+    res.json({result: true, abonnement: data})
+
+  });
+})
 module.exports = router;
