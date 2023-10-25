@@ -49,7 +49,7 @@ router.post("/generate-story", async (req, res) => {
     );
 
     if (!storyResponse.ok) {
-      throw new Error("Erreur lors de la génération de l'histoire");
+      throw new Error("Erreur lors de la génération de l'histoire reponse false");
     }
 
 
@@ -74,7 +74,7 @@ router.post("/generate-story", async (req, res) => {
     console.error(error);
     res
       .status(500)
-      .json({ error: "Erreur lors de la génération de l'histoire" });
+      .json({ error: "Erreur lors de la génération de l'histoire etape 1" });
   }
 });
 
