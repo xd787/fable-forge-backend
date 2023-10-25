@@ -63,17 +63,17 @@ router.post("/generate-story", async (req, res) => {
     // const titleMatch = storyMessage.match(/Titre\s*:\s*"(.*?)"/);
     // const titleMatch = storyMessage.match(/Title:\s*"(.*?)"/);
 
-    const titleRegex = /Titre\s*:\s*"([^"]+)/;
-    const titleMatch = storyMessage.match(titleRegex);
+  //   const titleRegex = /Titre\s*:\s*"([^"]+)/;
+  //   const titleMatch = storyMessage.match(titleRegex);
 
-    if (titleMatch && titleMatch[1]) {
-     const title = titleMatch[1];
-   // Remove the title from the story content
-    const storyWithoutTitle = storyMessage.replace(titleMatch[0], '').trim();   
-     res.json({title, storyWithoutTitle });
-    } else {
-      console.log('Title not found. Input Text:', storyMessage);
-    }
+  //   if (titleMatch && titleMatch[1]) {
+  //    const title = titleMatch[1];
+  //  // Remove the title from the story content
+  //   const storyWithoutTitle = storyMessage.replace(titleMatch[0], '').trim();   
+     res.json({storyMessage});
+    // } else {
+    //   console.log('Title not found. Input Text:', storyMessage);
+    // }
 
 
 
