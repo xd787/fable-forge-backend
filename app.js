@@ -6,6 +6,7 @@ const Genre = require('./models/genre');
 const Story = require('./models/story')
 
 var express = require('express');
+const bodyParser = require('body-parser');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -17,6 +18,7 @@ const apiRouter = require('./routes/api')
 
 var app = express();
 const cors = require('cors');
+app.use(bodyParser.json());
 app.use(cors());
 
 app.use(logger('dev'));
