@@ -10,11 +10,11 @@ router.post("/generate-story", async (req, res) => {
   const { genre, fin, longueur } = req.body;
 
   let maxTokens;
-  if (longueur === "1") {
+  if (req.body.longueur === "1") {
     maxTokens = Math.floor(Math.random() * (800 - 600 + 1) + 600);
-  } else if (longueur === "2") {
+  } else if (req.body.longueur === "2") {
     maxTokens = Math.floor(Math.random() * (1500 - 800 + 1) + 800);
-  } else if (longueur === "3") {
+  } else if (req.body.longueur === "3") {
     maxTokens = Math.floor(Math.random() * (4000 - 1500 + 1) + 1500);
   } else {
     // Valeur par défaut si la sélection n'est pas valide
@@ -23,7 +23,7 @@ router.post("/generate-story", async (req, res) => {
 
   try {
     // Construisez le message utilisateur à partir des données reçues
-    const userMessage = `Je souhaite créer une histoire de genre ${genre} d'environ ${longueur} pages, soit environ 300 tokens par page A4. Assurez-vous que l'histoire a une fin ${fin} en accord avec le genre. M'inspirer pour le personnage principal, le lieu de départ et l'époque. Créer aussi un titre avant le texte de l'histoire. `;
+    const userMessage = `Je souhaite créer une histoire de genre ${req.body.genre} d'environ ${req.body.longueur} pages, soit environ 300 tokens par page A4. Assurez-vous que l'histoire a une fin ${req.body.fin} en accord avec le genre. M'inspirer pour le personnage principal, le lieu de départ et l'époque. Créer aussi un titre avant le texte de l'histoire. `;
 
     // Utilisez ces informations pour créer la requête à l'API OpenAI
     const requestBody = {
