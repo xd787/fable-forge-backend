@@ -15,6 +15,7 @@ const storySchema = mongoose.Schema({
     interactivity: Boolean,
     length: String,
     title: String,
+    type: String,
     endingType: String,
     character: characterSchema, //Sous document - character
     departureLocation: String,

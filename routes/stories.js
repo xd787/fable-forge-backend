@@ -29,6 +29,7 @@ router.post("/new/:token", (req, res) => {
         interactivity: false,
         length: req.body.length,
         title: req.body.title,
+        type: req.body.type,
         endingType: req.body.ending,
         character: {
           characterName: null,
@@ -36,11 +37,11 @@ router.post("/new/:token", (req, res) => {
           characterDescription: null,
           characterImage: null,
         },
-        departureLocation: req.body.startPlace,
+        departureLocation: null,
         user: data._id,
         completed: false,
         image: null,
-        choicePrompt: [{ choiceText: null }],
+        choicePrompt: [{ choiceText: req.body.story }],
       });
 
       newStory.save().then((newDoc) => {
