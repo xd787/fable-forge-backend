@@ -7,7 +7,7 @@ const API_URL = process.env.API_URL;
 
 // Backend endpoint pour générer l'histoire
 router.post('/generate-story', async (req, res) => {
-  const { genre, longueur, fin, epoque } = req.body;
+  const { genre, longueur, fin} = req.body;
 
   let maxTokens;
   if (longueur === 'Courte') {
@@ -22,7 +22,7 @@ router.post('/generate-story', async (req, res) => {
   }
 
   // Construisez le message utilisateur à partir des données reçues
-  const userMessage = `Je souhaite créer une histoire de genre ${genre} d'environ ${longueur} pages. Je préfère une fin ${fin}. M'inspirer pour le personnage principal et le lieu de départ. L'époque de l'histoire sera ${epoque}. Créer aussi un titre avant le texte de l'histoire`;
+  const userMessage = `Je souhaite créer une histoire de genre ${genre} d'environ ${longueur} pages. Je préfère une fin ${fin}. M'inspirer pour le personnage principal, le lieu de départ et l'époque. Créer aussi un titre avant le texte de l'histoire`;
 
   // Utilisez ces informations pour créer la requête à l'API OpenAI
   const requestBody = {
@@ -70,5 +70,3 @@ router.post('/generate-story', async (req, res) => {
 
 module.exports = router;
 
-API_KEY = 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
-API_URL = https://api.openai.com/v1/chat/completions
