@@ -97,9 +97,9 @@ router.delete("/", (req, res) => {
 
 
 //PUT modifier les infos user
-router.put("/information", (req, res) => {
+router.put("/information/:token", (req, res) => {
   User.updateOne(
-    { token: req.body.token },
+    { token: req.params.token },
     {
       firstname: req.body.firstname,
       username: req.body.username,
