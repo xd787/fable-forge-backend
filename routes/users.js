@@ -96,20 +96,46 @@ router.delete("/", (req, res) => {
 
 
 
-//PUT modifier les infos user
-router.put("/information", (req, res) => {
-  User.updateOne(
-    { token: req.body.token },
-    {
-      username: req.body.username,
-      firstname: req.body.firstname,
-      email: req.body.email,
-    }
-  ).then((data) => {
-    res.json({result: "User information updated successfully"  });
-  });
-});
+// //PUT modifier les infos user
+// router.put("/information", (req, res) => {
+//   User.updateOne(
+//     { token: req.body.token },
+//     {
+//       username: req.body.username,
+//       firstname: req.body.firstname,
+//       email: req.body.email,
+//     }
+//   ).then((data) => {
+//     res.json({result: "User information updated successfully"  });
+//   });
+// });
 
+
+router.put("/users/information", async (req, res) => {
+  try {
+    const { token, email, firstname, username } = req.body;
+
+    // Find the user using the provided token
+    const user = await User.findOne({ token });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update user's information
+    user.email = email;
+    user.firstname = firstname;
+    user.username = username;
+
+    // Save the updated user
+    await user.save();
+
+    res.json({ result: "User information updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "User information update failed" });
+  }
+});
 
 //PUT modifier les infos user
 router.put("/password/:token", (req, res) => {
