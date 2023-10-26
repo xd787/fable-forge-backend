@@ -138,25 +138,33 @@ router.put("/users/information", async (req, res) => {
 });
 
 
-//PUT modifier les infos user
-router.put("/password/:token", (req, res) => {
-  const hash = bcrypt.hashSync(req.body.newPassword, 10);
-  User.findOne(
-    { token: req.params.token })
-    .then((data) => {
-    if (data && bcrypt.compareSync(req.body.oldPassword, data.password)) {
-    
-    User.updateOne(
-        { token: req.params.token },
-        { password: hash,}
-      ).then((data) => {
-        res.json({ data });
-      });
+
+// PUT route to update a user's password
+router.put("/password", (req, res) => {
+  const { token, oldPassword, newPassword } = req.body;
+  // First, find the user based on the provided token
+  User.findOne({ token: token }).then((user) => {
+
+    if (!user) {
+      return res.json({ result: false, error: "User not found" });
+    }
+
+    // Verify the old password
+    if (bcrypt.compareSync(oldPassword, user.password)) {
+      // Hash the new password
+      const hash = bcrypt.hashSync(newPassword, 10);
+    // Update the user's password
+    User.updateOne({ token: token }, { password: hash })
+        .then(() => {
+          res.json({ result: true, message: "Password updated successfully" });
+        })
+        .catch((error) => {
+          res.json({ result: false, error: "Password update failed" });
+        });
     } else {
       res.json({ result: false, error: "Wrong password" });
     }
   });
-
 });
 
 
