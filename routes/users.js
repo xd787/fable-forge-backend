@@ -137,6 +137,7 @@ router.put("/users/information", async (req, res) => {
   }
 });
 
+
 //PUT modifier les infos user
 router.put("/password/:token", (req, res) => {
   const hash = bcrypt.hashSync(req.body.newPassword, 10);
