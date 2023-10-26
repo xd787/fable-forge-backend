@@ -97,20 +97,38 @@ router.delete("/", (req, res) => {
 
 
 //PUT modifier les infos user
-router.put("/", (req, res) => {
-  const hash = bcrypt.hashSync(req.body.password, 10);
-
+router.put("/information", (req, res) => {
   User.updateOne(
     { token: req.body.token },
     {
       firstname: req.body.firstname,
       username: req.body.username,
       email: req.body.email,
-      password: hash,
     }
   ).then((data) => {
     res.json({ data });
   });
+});
+
+//PUT modifier les infos user
+router.put("/password/:token", (req, res) => {
+  const hash = bcrypt.hashSync(req.body.newPassword, 10);
+  User.findOne(
+    { token: req.params.token })
+    .then((data) => {
+    if (data && bcrypt.compareSync(req.body.oldPassword, data.password)) {
+    
+    User.updateOne(
+        { token: req.params.token },
+        { password: hash,}
+      ).then((data) => {
+        res.json({ data });
+      });
+    } else {
+      res.json({ result: false, error: "Wrong password" });
+    }
+  });
+
 });
 
 
