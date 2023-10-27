@@ -3,48 +3,56 @@ const router = express.Router();
 const fetch = require("node-fetch");
 
 const API_KEY = process.env.API_KEY;
-const API_URL = process.env.API_URL;
 
-async function generateStoryPart(previousParts, tokensToGenerate) {
+const TOKENS_PER_REQUEST = 20;
+
+async function generateStoryPart(previousParts, maxTotalTokens) {
     let conversationHistory = [
         { role: "system", content: "You are the best storyteller there is." }
     ];
-
-    // Ajoutez les parties précédentes à l'historique de la conversation
     for (const part of previousParts) {
         conversationHistory.push({ role: "user", content: part });
     }
 
-    // Ajoutez la dernière instruction à l'historique de la conversation
-    conversationHistory.push({ role: "user", content: "Continuez l'histoire." });
+    let totalGenerated = '';
+    let tokensGenerated = 0;
 
-    const requestBody = {
-        model: "gpt-3.5-turbo-16k",
-        messages: conversationHistory,
-        max_tokens: tokensToGenerate,
-        temperature: 1,
-    };
+    while (tokensGenerated < maxTotalTokens) {
+        const tokensForThisRequest = Math.min(TOKENS_PER_REQUEST, maxTotalTokens - tokensGenerated);
 
-    const storyResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${API_KEY}`,
-        },
-        body: JSON.stringify(requestBody),
-    });
+        const requestBody = {
+            model: "gpt-3.5-turbo-16k",
+            messages: conversationHistory,
+            max_tokens: tokensForThisRequest,
+            temperature: 1,
+        };
 
-    if (!storyResponse.ok) {
-        throw new Error("Error generating story part from OpenAI API");
+        const storyResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${API_KEY}`,
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        if (!storyResponse.ok) {
+            throw new Error("Error generating story part from OpenAI API");
+        }
+
+        const storyData = await storyResponse.json();
+        const storyPart = storyData.choices[0].message.content;
+        
+        totalGenerated += storyPart; // Concaténez le résultat à votre histoire
+        tokensGenerated += storyPart.split(' ').length; // Estimation simple du nombre de tokens générés
+
+        // Ajoutez le contenu généré au contexte pour la prochaine itération
+        conversationHistory.push({ role: "user", content: storyPart });
     }
 
-    const storyData = await storyResponse.json();
-    const storyPart = storyData.choices[0].message.content;
-
-    return storyPart;
+    return totalGenerated;
 }
 
-// Backend endpoint for generating the story
 router.post("/generate-story", async (req, res) => {
   const { genre, fin, longueur } = req.body;
 
@@ -61,17 +69,16 @@ router.post("/generate-story", async (req, res) => {
   }
 });
 
-// Fonction pour calculer le nombre total de tokens en fonction de la longueur
 function calculateMaxTokens(longueur) {
-    if (longueur === "1") {
-        return Math.floor(Math.random() * (800 - 600 + 1) + 600);
-    } else if (longueur === "2") {
-        return Math.floor(Math.random() * (1500 - 800 + 1) + 800);
-    } else if (longueur === "3") {
-        return Math.floor(Math.random() * (4000 - 1500 + 1) + 1500);
-    } else {
-        return 1000; // Nombre de tokens par défaut si aucune sélection valide
-    }
+  if (longueur === "1") {
+      return Math.floor(Math.random() * (800 - 600 + 1) + 600);
+  } else if (longueur === "2") {
+      return Math.floor(Math.random() * (1500 - 800 + 1) + 800);
+  } else if (longueur === "3") {
+      return Math.floor(Math.random() * (4000 - 1500 + 1) + 1500);
+  } else {
+      return 1000; // Nombre de tokens par défaut si aucune sélection valide
+  }
 }
 
 module.exports = router;
