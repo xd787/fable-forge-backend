@@ -16,10 +16,7 @@ router.post("/generate-story", async (req, res) => {
 
     const generatedStory = await generateStory(userMessage, maxTokens);
 
-    // Diviser l'histoire en parties de 40 tokens
-    const storyParts = splitStoryIntoParts(generatedStory, 40);
-
-    res.json({ storyParts });
+    res.json({ story: generatedStory });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: `Error generating the story: ${error.message}` });
@@ -39,36 +36,40 @@ function calculateMaxTokens(longueur) {
   }
 }
 
-// Fonction pour générer l'histoire en plusieurs parties de 40 tokens
+// Fonction pour générer l'histoire en fonction de maxTokens
 async function generateStory(prompt, maxTokens) {
-  const result = [];
-  let tokensGenerated = 0;
+  let generatedStory = "";
 
-  while (tokensGenerated < maxTokens) {
-    const tokensToGenerate = Math.min(20, maxTokens - tokensGenerated);
-    const requestBody = createRequestBody(prompt, tokensToGenerate);
-
-    const storyResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (!storyResponse.ok) {
-      throw new Error("Error generating story from OpenAI API");
-    }
-
-    const storyData = await storyResponse.json();
-    const storyPart = storyData.choices[0].message.content;
-    result.push(storyPart);
-
-    tokensGenerated += storyPart.length;
+  while (generatedStory.length < maxTokens) {
+    const tokensToGenerate = Math.min(20, maxTokens - generatedStory.length);
+    const storyPart = await generateStoryPart(prompt, tokensToGenerate);
+    generatedStory += storyPart;
   }
 
-  return result.join("");
+  return generatedStory;
+}
+
+// Fonction pour générer une partie de l'histoire
+async function generateStoryPart(prompt, tokensToGenerate) {
+  const requestBody = createRequestBody(prompt, tokensToGenerate);
+
+  const storyResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${API_KEY}`,
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!storyResponse.ok) {
+    throw new Error("Error generating story part from OpenAI API");
+  }
+
+  const storyData = await storyResponse.json();
+  const storyPart = storyData.choices[0].message.content;
+
+  return storyPart;
 }
 
 // Fonction pour créer la demande vers l'API OpenAI
@@ -82,15 +83,6 @@ function createRequestBody(prompt, maxTokens) {
     max_tokens: maxTokens,
     temperature: 1,
   };
-}
-
-// Fonction pour diviser l'histoire en parties de tokens
-function splitStoryIntoParts(story, partSize) {
-  const storyParts = [];
-  for (let i = 0; i < story.length; i += partSize) {
-    storyParts.push(story.slice(i, i + partSize));
-  }
-  return storyParts;
 }
 
 module.exports = router;
