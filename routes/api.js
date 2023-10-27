@@ -9,12 +9,19 @@ const API_URL = process.env.API_URL;
 router.post("/generate-story", async (req, res) => {
   const { genre, fin, longueur } = req.body;
 
-  const maxTokens = calculateMaxTokens(longueur); // Calcul du nombre total de tokens
-
   try {
     const userMessage = `Je souhaite créer une histoire de genre ${genre} d'environ ${longueur} pages, soit environ 300 tokens par page A4. Assurez-vous que l'histoire a une fin ${fin} en accord avec le genre. M'inspirer pour le personnage principal, le lieu de départ et l'époque. Créer aussi un titre avant le texte de l'histoire.`;
 
-    const generatedStory = await generateStory(userMessage, maxTokens);
+    let generatedStory = '';
+    let maxTokens = calculateMaxTokens(longueur);
+
+    while (generatedStory.length < maxTokens) {
+      const tokensToGenerate = 20; // Générer 20 tokens à la fois
+      const storyPart = await generateStoryPart(userMessage, tokensToGenerate);
+      generatedStory += storyPart;
+      // Utilisez la dernière partie de l'histoire comme nouvelle entrée pour le prochain appel
+      userMessage = storyPart;
+    }
 
     res.json({ story: generatedStory });
   } catch (error) {
@@ -34,19 +41,6 @@ function calculateMaxTokens(longueur) {
   } else {
     return 1000; // Nombre de tokens par défaut si aucune sélection valide
   }
-}
-
-// Fonction pour générer l'histoire en fonction de maxTokens
-async function generateStory(prompt, maxTokens) {
-  let generatedStory = "";
-
-  while (generatedStory.length < maxTokens) {
-    const tokensToGenerate = Math.min(10, maxTokens - generatedStory.length);
-    const storyPart = await generateStoryPart(prompt, tokensToGenerate);
-    generatedStory += storyPart;
-  }
-
-  return generatedStory;
 }
 
 // Fonction pour générer une partie de l'histoire
