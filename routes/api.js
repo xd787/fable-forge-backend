@@ -45,7 +45,7 @@ async function generateStory(prompt, maxTokens) {
   let tokensGenerated = 0;
 
   while (tokensGenerated < maxTokens) {
-    const tokensToGenerate = Math.min(40, maxTokens - tokensGenerated);
+    const tokensToGenerate = Math.min(20, maxTokens - tokensGenerated);
     const requestBody = createRequestBody(prompt, tokensToGenerate);
 
     const storyResponse = await fetch('https://api.openai.com/v1/chat/completions', {
