@@ -41,7 +41,7 @@ async function generateStory(prompt, maxTokens) {
   let generatedStory = "";
 
   while (generatedStory.length < maxTokens) {
-    const tokensToGenerate = Math.min(20, maxTokens - generatedStory.length);
+    const tokensToGenerate = Math.min(10, maxTokens - generatedStory.length);
     const storyPart = await generateStoryPart(prompt, tokensToGenerate);
     generatedStory += storyPart;
   }
