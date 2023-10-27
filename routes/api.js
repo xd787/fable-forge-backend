@@ -3,30 +3,34 @@ const router = express.Router();
 const fetch = require("node-fetch");
 
 const API_KEY = process.env.API_KEY;
+const MAX_TOKENS = {
+    "1": { min: 600, max: 800 },
+    "2": { min: 800, max: 1500 },
+    "3": { min: 1500, max: 4000 },
+};
 
 router.post("/generate-story", async (req, res) => {
     const { genre, fin, longueur, messages } = req.body;
 
-    let maxTokens;
-    if (longueur === "1") {
-        maxTokens = Math.floor(Math.random() * (800 - 600 + 1) + 600);  // Vos valeurs semblaient être incorrectes ici
-    } else if (longueur === "2") {
-        maxTokens = Math.floor(Math.random() * (1500 - 800 + 1) + 800);
-    } else if (longueur === "3") {
-        maxTokens = Math.floor(Math.random() * (4000 - 1500 + 1) + 1500);
-    } else {
-        maxTokens = 1000;
-    }
+    // Vérifiez si la longueur est valide, sinon définissez-la sur 1
+    const lengthKey = ["1", "2", "3"].includes(longueur) ? longueur : "1";
+
+    // Générez un nombre aléatoire de tokens en fonction de la longueur choisie
+    const { min, max } = MAX_TOKENS[lengthKey];
+    const maxTokens = Math.floor(Math.random() * (max - min + 1) + min);
 
     const conversation = messages || [
         { role: "system", content: "You are the best storyteller there is." },
-        { role: "user", content: `Je souhaite créer une histoire de genre ${genre} d'environ ${longueur} pages, soit environ 300 tokens par page A4. Assurez-vous que l'histoire a une fin ${fin} en accord avec le genre. M'inspirer pour le personnage principal, le lieu de départ et l'époque. Créer aussi un titre avant le texte de l'histoire.` }  // Votre message initial
+        {
+            role: "user",
+            content: `Je souhaite créer une histoire de genre ${genre} d'environ ${longueur} pages, soit environ 300 tokens par page A4. Assurez-vous que l'histoire a une fin ${fin} en accord avec le genre. M'inspirer pour le personnage principal, le lieu de départ et l'époque. Créer aussi un titre avant le texte de l'histoire.`,
+        },
     ];
 
     try {
         let totalGenerated = '';
 
-        // Nous utilisons une boucle pour effectuer plusieurs requêtes jusqu'à ce que nous atteignions maxTokens
+        // Utilisez une boucle pour obtenir plusieurs segments de texte jusqu'à ce que vous atteigniez maxTokens
         while (totalGenerated.split(' ').length < maxTokens) {
             const storyResponse = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: "POST",
@@ -37,7 +41,7 @@ router.post("/generate-story", async (req, res) => {
                 body: JSON.stringify({
                     model: "gpt-3.5-turbo-16k",
                     messages: conversation,
-                    max_tokens: Math.min(20, maxTokens - totalGenerated.split(' ').length),  // Ne demandez que les tokens nécessaires
+                    max_tokens: Math.min(20, maxTokens - totalGenerated.split(' ').length),  // Demandez uniquement les tokens nécessaires
                     temperature: 1,
                 }),
             });
