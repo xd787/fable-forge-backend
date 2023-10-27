@@ -46,27 +46,19 @@ async function generateStoryPart(previousParts, tokensToGenerate) {
 
 // Backend endpoint for generating the story
 router.post("/generate-story", async (req, res) => {
-    const { genre, fin, longueur } = req.body;
+  const { genre, fin, longueur } = req.body;
 
-    try {
-        let userMessage = `Je souhaite créer une histoire de genre ${genre} d'environ ${longueur} pages, soit environ 300 tokens par page A4. Assurez-vous que l'histoire a une fin ${fin} en accord avec le genre. M'inspirer pour le personnage principal, le lieu de départ et l'époque. Créer aussi un titre avant le texte de l'histoire.`;
+  try {
+      let userMessage = `Je souhaite créer une histoire de genre ${genre} d'environ ${longueur} pages, soit environ 300 tokens par page A4. Assurez-vous que l'histoire a une fin ${fin} en accord avec le genre. M'inspirer pour le personnage principal, le lieu de départ et l'époque. Créer aussi un titre avant le texte de l'histoire.`;
 
-        let generatedStory = '';
-        let maxTokens = calculateMaxTokens(longueur);
-        let previousParts = [userMessage]; // Stockez le message utilisateur comme première partie
+      const maxTokens = calculateMaxTokens(longueur);
+      let generatedStory = await generateStoryPart([userMessage], maxTokens);
 
-        while (generatedStory.length < maxTokens) {
-            const tokensToGenerate = 20;
-            const storyPart = await generateStoryPart(previousParts, tokensToGenerate);
-            generatedStory += storyPart;
-            previousParts.push(storyPart); // Ajoutez la nouvelle partie à l'historique des parties précédentes
-        }
-
-        res.json({ story: generatedStory });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: `Error generating the story: ${error.message}` });
-    }
+      res.json({ storyWithoutTitle: generatedStory });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: `Error generating the story: ${error.message}` });
+  }
 });
 
 // Fonction pour calculer le nombre total de tokens en fonction de la longueur
