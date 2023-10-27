@@ -31,7 +31,7 @@ router.post("/generate-story", async (req, res) => {
 
   let maxTokens;
   if (longueur === "1") {
-    maxTokens = Math.floor(Math.random() * (800 - 600 + 1) + 600);
+    maxTokens = Math.floor(Math.random() * (10 - 50 + 1) + 50);
   } else if (longueur === "2") {
     maxTokens = Math.floor(Math.random() * (1500 - 800 + 1) + 800);
   } else if (longueur === "3") {
