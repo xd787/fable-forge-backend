@@ -58,7 +58,7 @@ router.post("/generate-story", async (req, res) => {
     if (newLineIndex !== -1) {
       const title = storyMessage.slice(0, newLineIndex).trim();
       const storyWithoutTitle = storyMessage.slice(newLineIndex).trim();
-      res.json({ title, storyWithoutTitle });
+      res.json({ title, storyWithoutTitle }); // Renvoyez le titre et le texte séparément
     } else {
       // Handle the case where no newline character is found
       res.json({ title: "Title not found", storyMessage });
