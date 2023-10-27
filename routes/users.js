@@ -14,7 +14,7 @@ router.post("/signup", (req, res) => {
     return;
   }
   // Check if the user does not already exist in data base
-  User.findOne({ username: req.body.username }).then((data) => {
+  User.findOne({ username: req.body.username }).then(data => {
     if (data === null) {
       const hash = bcrypt.hashSync(req.body.password, 10);
 
@@ -36,7 +36,7 @@ router.post("/signup", (req, res) => {
         paymentMethod: null,
       });
 
-      newUser.save().then((newDoc) => {
+      newUser.save().then(newDoc => {
         res.json({ result: true, token: newDoc.token });
       });
     } else {
@@ -45,8 +45,6 @@ router.post("/signup", (req, res) => {
     }
   });
 });
-
-
 
 //POST CONNECTION
 router.post("/signin", (req, res) => {
@@ -61,9 +59,7 @@ router.post("/signin", (req, res) => {
       identifier
     );
 
-  User.findOne(
-    isEmail ? { email: identifier } : { username: identifier }
-  ).then((data) => {
+  User.findOne(isEmail ? { email: identifier } : { username: identifier }).then(data => {
     if (data && bcrypt.compareSync(password, data.password)) {
       res.json({
         result: true,
@@ -78,14 +74,12 @@ router.post("/signin", (req, res) => {
   });
 });
 
-
-
 //DELETE suppression de compte
 router.delete("/", (req, res) => {
-  User.deleteOne({ token: req.body.token }).then((deletedDoc) => {
+  User.deleteOne({ token: req.body.token }).then(deletedDoc => {
     if (deletedDoc.deletedCount > 0) {
       // User successfully deleted
-      User.find().then((data) => {
+      User.find().then(data => {
         res.json({ result: true });
       });
     } else {
@@ -93,8 +87,6 @@ router.delete("/", (req, res) => {
     }
   });
 });
-
-
 
 // //PUT modifier les infos user
 // router.put("/information", (req, res) => {
@@ -110,8 +102,7 @@ router.delete("/", (req, res) => {
 //   });
 // });
 
-
-router.put("/users/information", async (req, res) => {
+router.put("/information", async (req, res) => {
   try {
     const { token, email, firstname, username } = req.body;
 
@@ -137,14 +128,11 @@ router.put("/users/information", async (req, res) => {
   }
 });
 
-
-
 // PUT route to update a user's password
 router.put("/password", (req, res) => {
   const { token, oldPassword, newPassword } = req.body;
   // First, find the user based on the provided token
-  User.findOne({ token: token }).then((user) => {
-
+  User.findOne({ token: token }).then(user => {
     if (!user) {
       return res.json({ result: false, error: "User not found" });
     }
@@ -153,12 +141,12 @@ router.put("/password", (req, res) => {
     if (bcrypt.compareSync(oldPassword, user.password)) {
       // Hash the new password
       const hash = bcrypt.hashSync(newPassword, 10);
-    // Update the user's password
-    User.updateOne({ token: token }, { password: hash })
+      // Update the user's password
+      User.updateOne({ token: token }, { password: hash })
         .then(() => {
           res.json({ result: true, message: "Password updated successfully" });
         })
-        .catch((error) => {
+        .catch(error => {
           res.json({ result: false, error: "Password update failed" });
         });
     } else {
@@ -167,27 +155,23 @@ router.put("/password", (req, res) => {
   });
 });
 
-
 //GET avoir la dernière histoire
 router.get("/lastStory/:token", (req, res) => {
   User.findOne({ token: req.params.token })
-  .populate('stories')
-  .then((data) => {
-    let lastStories = data.stories[data.stories.length -1]
-    res.json({ result: true, stories: lastStories });
-  });
+    .populate("stories")
+    .then(data => {
+      let lastStories = data.stories[data.stories.length - 1];
+      res.json({ result: true, stories: lastStories });
+    });
 });
-
 
 //GET toutes les histoires selon l’utilisateur
 router.get("/stories/:token", (req, res) => {
   User.findOne({ token: req.params.token })
-  .populate('stories')
-  .then((data) => {
-    res.json({ result: true, stories: data.stories });
-  });
+    .populate("stories")
+    .then(data => {
+      res.json({ result: true, stories: data.stories });
+    });
 });
-
-
 
 module.exports = router;
