@@ -58,7 +58,7 @@ router.post("/generate-story", async (req, res) => {
 
     console.log('Sending request to OpenAI with body:', JSON.stringify(requestBody, null, 2)); // 2. Log avant l'appel à l'API
 
-    const storyResponse = await fetch(`${API_URL}`, {
+    const storyResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
