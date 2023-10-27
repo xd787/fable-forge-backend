@@ -19,8 +19,7 @@ router.post("/generate-story", async (req, res) => {
       const tokensToGenerate = 20; // Générer 20 tokens à la fois
       const storyPart = await generateStoryPart(userMessage, tokensToGenerate);
       generatedStory += storyPart;
-      // Utilisez la dernière partie de l'histoire comme nouvelle entrée pour le prochain appel
-      userMessage = storyPart;
+      userMessage = `Continue l'histoire : ${storyPart}`; // Utilisez la dernière partie de l'histoire comme suite du message
     }
 
     res.json({ story: generatedStory });
