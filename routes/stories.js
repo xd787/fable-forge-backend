@@ -41,7 +41,7 @@ router.post("/new/:token", (req, res) => {
         user: data._id,
         completed: false,
         image: null,
-        choicePrompt: [{ choiceText: req.body.story }],
+        choicePrompt: req.body.story ,
       });
 
       newStory.save().then((newDoc) => {
