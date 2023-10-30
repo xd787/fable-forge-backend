@@ -160,8 +160,19 @@ router.get("/lastStory/:token", (req, res) => {
   User.findOne({ token: req.params.token })
     .populate("stories")
     .then(data => {
-      let lastStories = data.stories[data.stories.length - 1];
-      res.json({ result: true, stories: lastStories });
+      if (data.stories && data.stories.length > 0) {
+        // User has stories, retrieve the last one
+        const lastStory = data.stories[data.stories.length - 1];
+        res.json({ result: true, story: lastStory });
+      } else {
+        // User has no stories
+        res.json({ result: true, story: null });
+      }
+    })
+    .catch(error => {
+      // Handle any errors
+      console.error(error);
+      res.json({ result: false, error: "An error occurred while fetching the last story." });
     });
 });
 
