@@ -9,7 +9,7 @@ const uid2 = require("uid2");
 router.delete("/:storyID/:token", (req, res) => {
   Stories.deleteOne({ _id: req.params.storyID }).then((deletedDoc) => {
     if (deletedDoc.deletedCount > 0) {
-      User.updateOne({ token: req.params.token },{ $pull: { stories: req.params.storyID } })
+      User.updateOne({ token: req.body.token },{ $pull: { stories: req.params.storyID } })
         .then((data) => {
           res.json({ result: true});
         });
@@ -17,7 +17,7 @@ router.delete("/:storyID/:token", (req, res) => {
     } else {
       res.json({ result: false, error: "Story not found" });
     }
-  });
+  })
 });
 
 
