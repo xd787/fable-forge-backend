@@ -40,7 +40,7 @@ router.post("/new/:token", (req, res) => {
         departureLocation: null,
         user: data._id,
         completed: false,
-        image: req.body.image,
+        image: null,
         choicePrompt: req.body.story ,
       });
 
