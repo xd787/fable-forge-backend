@@ -6,7 +6,7 @@ const User = require("../models/user");
 const uid2 = require("uid2");
 
 //DELETE histoire selon l’ID de l’histoire
-router.delete("/:storyID/:token", (req, res) => {
+router.delete("/:storyID", (req, res) => {
   Stories.deleteOne({ _id: req.params.storyID }).then((deletedDoc) => {
     if (deletedDoc.deletedCount > 0) {
       User.updateOne({ token: req.body.token },{ $pull: { stories: req.params.storyID } })
