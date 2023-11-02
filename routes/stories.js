@@ -15,7 +15,7 @@ router.delete("/:storyID", (req, res) => {
     } else {
       res.json({ result: false, error: "Story not found" });
     }
-  });
+  })
 });
 
 //POST poster une histoire selon l’utilisateur
