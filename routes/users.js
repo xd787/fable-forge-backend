@@ -35,7 +35,7 @@ router.post("/signup", (req, res) => {
         },
         paymentMethod: null,
       });
-
+      // Save to the BDD
       newUser.save().then(newDoc => {
         res.json({ result: true, token: newDoc.token });
       });
@@ -88,20 +88,7 @@ router.delete("/", (req, res) => {
   });
 });
 
-// //PUT modifier les infos user
-// router.put("/information", (req, res) => {
-//   User.updateOne(
-//     { token: req.body.token },
-//     {
-//       username: req.body.username,
-//       firstname: req.body.firstname,
-//       email: req.body.email,
-//     }
-//   ).then((data) => {
-//     res.json({result: "User information updated successfully"  });
-//   });
-// });
-
+// PUT route to update a user's information
 router.put("/information", async (req, res) => {
   try {
     const { token, email, firstname, username } = req.body;
