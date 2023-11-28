@@ -6,75 +6,121 @@ const router = express.Router();
 const fetch = require("node-fetch");
 
 const API_KEY = process.env.API_KEY;
+const API_URL = process.env.API_URL
+
 const MAX_TOKENS = {
-  "1": { min: 600, max: 800 },
-  "2": { min: 800, max: 1500 },
-  "3": { min: 1500, max: 4000 },
+  Courte: { min: 400, max: 800 },
+  Moyenne: { min: 800, max: 1200 },
+  Longue: { min: 1200, max: 1600 },
 };
 
-// POST: Generate a story with all settings (typend, style, length)
+// POST: Generate a story with all settings (type, style, length)
 router.post("/generate-story", async (req, res) => {
-  const { genre, fin, longueur, messages } = req.body;
+  const { genre, fin, longueur } = req.body;
 
-  // Vérifiez si la longueur est valide, sinon définissez-la sur 1
-  const lengthKey = ["1", "2", "3"].includes(longueur) ? longueur : "1";
+  // USER MESSAGE
+  const prompt = `Je souhaite créer une histoire de genre ${genre} de longueur ${longueur}. Je veux une ${fin}.`;
 
-  // Générez un nombre aléatoire de tokens en fonction de la longueur choisie
+  // LENGTH GENERATOR
+  const lengthKey = ["Courte", "Moyenne", "Longue"].includes(longueur)
+    ? longueur
+    : "Courte";
   const { min, max } = MAX_TOKENS[lengthKey];
   const maxTokens = Math.floor(Math.random() * (max - min + 1) + min);
 
-  const conversation = messages || [
-    { role: "system", content: "You are the best storyteller there is." },
-    {
-      role: "user",
-      content: `Je souhaite créer une histoire de genre ${genre} d'environ ${longueur} pages, soit environ 300 tokens par page A4. Assurez-vous que l'histoire a une fin ${fin} en accord avec le genre. M'inspirer pour le personnage principal, le lieu de départ et l'époque. Créer aussi un titre avant le texte de l'histoire.`,
-    },
-  ];
+
+
+  const generateNextChunk = async () => {
+    let totalTokens = 0;
+    const storyChunks = [];
+
+    while (totalTokens < maxTokens) {
+      // Generate a chunk with a maximum of 250 tokens
+      const remainingTokens = maxTokens - totalTokens;
+      const tokensInThisChunk = remainingTokens > 250 ? 250 : remainingTokens;
+
+    // Préparation de la requête à envoyer à l'API
+    const data = {
+      model: "gpt-3.5-turbo-16k",
+      messages: [
+        {
+          role: "system",
+          content: `
+          Tu es un conteur d'histoires français, avec les consignes suivantes :\n\n-
+          Tu vas créer une seule et unique histoire.\n-
+          Tu ne commenceras pas les histoires par \"il était une fois\".\n- 
+          Créer aussi un titre avant le texte de l'histoire que tu mettras entre des balises \"!\".\n-`
+        },
+        { 
+          role: "user",
+          content: prompt 
+        }, // Message de l'utilisateur actuel
+      ],
+  
+      // Contrôle du style et de la diversité de la génération de texte
+      temperature: 1,
+      max_tokens: 250,
+      top_p: 1,
+      frequency_penalty: 1,
+      presence_penalty: 1,
+    };
+  
+
+      try {
+        // Fetch content for this chunk from the API
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${API_KEY}`,
+          },
+          body: JSON.stringify(data),
+        });
+
+        // Process the response and extract content for this chunk
+        const responseData = await response.json();
+        const generatedContent = responseData.generatedContent; // Adjust based on API response structure
+
+        // Extraction of the title and response content
+        const titleRegex = /!(.*?)!/;
+        const titleMatch = titleRegex.exec(generatedContent);
+        const title = titleMatch ? titleMatch[1] : "";
+
+        // Separating title from the main content
+        const contentWithoutTitle = generatedContent.replace(titleRegex, "");
+
+        // Constructing the chunk with title and response content
+        const chunk = {
+          title,
+          content: contentWithoutTitle,
+        };
+
+        // Push the generated chunk to the storyChunks array
+        storyChunks.push(chunk);
+
+        // Update totalTokens with tokensInThisChunk
+        totalTokens += tokensInThisChunk;
+      } catch (error) {
+        // Handle errors from API fetch
+        throw new Error("Error fetching story content");
+      }
+    }
+
+    // Return the generated story chunks
+    return storyChunks;
+  };
 
   try {
-    let totalGenerated = "";
+    // Generate the story chunks
+    const story = await generateNextChunk();
 
-    // Utilisez une boucle pour obtenir plusieurs segments de texte jusqu'à ce que vous atteigniez maxTokens
-    while (totalGenerated.split(" ").length < maxTokens) {
-      const storyResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo-16k",
-          messages: conversation,
-          max_tokens: Math.min(20, maxTokens - totalGenerated.split(" ").length), // Demandez uniquement les tokens nécessaires
-          temperature: 1,
-        }),
-      });
-
-      if (!storyResponse.ok) {
-        throw new Error("Error generating the story");
-      }
-
-      const storyData = await storyResponse.json();
-      const storyPart = storyData.choices[0].message.content;
-      totalGenerated += storyPart;
-
-      // Ajoutez le contenu généré à l'historique de la conversation pour la prochaine requête
-      conversation.push({ role: "user", content: storyPart });
-    }
-
-    // Traitement pour séparer le titre et l'histoire
-    const newLineIndex = totalGenerated.indexOf("\n");
-    if (newLineIndex !== -1) {
-      const title = totalGenerated.slice(0, newLineIndex).trim();
-      const storyWithoutTitle = totalGenerated.slice(newLineIndex).trim();
-      res.json({ title, storyWithoutTitle });
-    } else {
-      res.json({ title: "Title not found", storyWithoutTitle: totalGenerated });
-    }
+    // Respond with the generated story chunks or handle as needed
+    res.json({ result: "Story generated successfully", story });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: `Error generating the story: ${error.message}` });
+    // Handle errors if any
+    res.status(500).json({ result: "Error generating story", error: error.message });
   }
 });
 
 module.exports = router;
+
