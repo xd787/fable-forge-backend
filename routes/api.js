@@ -116,5 +116,5 @@ function initializeWebSocket(server) {
   });
 }
 
-app.set("wss", wss);
+
 module.exports = { initializeWebSocket };
