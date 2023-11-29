@@ -7,8 +7,15 @@ const WebSocket = require("ws");
 const API_KEY = process.env.API_KEY;
 const API_URL = process.env.API_URL;
 
+const wss = new WebSocket.Server({ noServer: true })
+
 function initializeWebSocket(server) {
-  const wss = new WebSocket.Server({ server });
+  // Attach the WebSocket server to the existing HTTP server
+  server.on("upgrade", (request, socket, head) => {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  });
 
   wss.on("connection", (socket) => {
     console.log("Client connected");
