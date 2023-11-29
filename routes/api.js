@@ -58,7 +58,7 @@ router.post("/generate-story", async (req, res) => {
     try {
       // FETCH API
       const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
+        API_URL,
         {
           method: "POST",
           headers: {
