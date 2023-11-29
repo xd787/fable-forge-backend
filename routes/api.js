@@ -1,16 +1,21 @@
-
 const fetch = require("node-fetch");
-const socketIo = require("socket.io");
+const express = require("express");
+const app = express();
+const http = require("http");
+const WebSocket = require("ws");
+
+
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
 const API_KEY = process.env.API_KEY;
 const API_URL = process.env.API_URL;
 
 
 function initializeWebSocket(server) {
-// Setup Socket.io
-const io = socketIo(server);
 
-io.on("connection", (socket) => {
+
+wss.on("connection", (socket) => {
   console.log("Client connected");
 
   socket.on("generate-story", async (body) => {
@@ -107,6 +112,7 @@ io.on("connection", (socket) => {
 
 }
 
-module.exports = initializeWebSocket;
+app.set("wss", wss)
+module.exports = { initializeWebSocket };
 
 

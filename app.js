@@ -19,7 +19,7 @@ app.use(cors());
 
 
 const http = require("http");
-const initializeWebSocket = require("./routes/api");
+const {initializeWebSocket} = require("./routes/api");
 const server = http.createServer(app);
 initializeWebSocket(server); // Initialize WebSocket
 const PORT = 3001;
