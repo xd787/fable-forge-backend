@@ -91,7 +91,7 @@ router.post("/generate-story", async (req, res) => {
       const titleMatch = titleRegex.exec(generatedStory);
       const title = titleMatch ? titleMatch[1] : "";
       const contentWithoutTitle = generatedStory.replace(titleRegex, "");
-      
+
       if (!sendChunk.titleSent) {
         sendChunk(title, contentWithoutTitle); 
         sendChunk.titleSent = true;
@@ -121,3 +121,5 @@ router.post("/generate-story", async (req, res) => {
 });
 
 module.exports = router;
+
+//TEST
