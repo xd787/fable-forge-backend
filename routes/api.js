@@ -1,24 +1,20 @@
-const express = require("express");
-const router = express.Router();
-const fetch = require("node-fetch");
-const socketIo = require('socket.io');
 
+const fetch = require("node-fetch");
+const socketIo = require("socket.io");
 
 const API_KEY = process.env.API_KEY;
 const API_URL = process.env.API_URL;
 
-// Create HTTP server
-const app = express();
-const server = require('http').createServer(app);
 
+function initializeWebSocket(server) {
 // Setup Socket.io
 const io = socketIo(server);
 
-io.on('connection', (socket) => {
-  console.log('Client connected');
+io.on("connection", (socket) => {
+  console.log("Client connected");
 
-  socket.on('generate-story', async (data) => {
-    const { type, endingType, length } = data;
+  socket.on("generate-story", async (body) => {
+    const { type, endingType, length } = body;
 
     const LENGTH_MAP = {
       Courte: { min: 800, max: 1300 },
@@ -73,37 +69,44 @@ io.on('connection', (socket) => {
 
         const responseData = await response.json();
         if (!response.ok || !responseData.choices || !responseData.choices[0]) {
-          socket.emit('storyChunk', { result: "Erreur lors de la génération de l'histoire" });
+          socket.emit("storyChunk", {
+            result: "Erreur lors de la génération de l'histoire",
+          });
         }
 
         const generatedContent = responseData.choices[0].message.content.trim();
 
         totalTokens += generatedContent.length;
-        socket.emit('storyChunk', { chunk: generatedContent });
+
+        //TITLE
+        const titleRegex = /!(.*?)!/;
+        const titleMatch = titleRegex.exec(generatedContent);
+        const title = titleMatch ? titleMatch[1] : "";
+        const contentWithoutTitle = generatedContent.replace(titleRegex, "");
+
+        socket.emit("storyChunk", { title: title, chunck: contentWithoutTitle });
 
         if (totalTokens >= tokenCount) {
-          socket.emit('storyChunk', { result: "Story generated successfully" });
+          socket.emit("storyChunk", { result: "Story generated successfully" });
           break;
         }
       } catch (error) {
-        socket.emit('storyChunk', { error: "Error generating story", details: error.message });
+        socket.emit("storyChunk", {
+          error: "Error generating story",
+          details: error.message,
+        });
         break;
       }
     }
   });
 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
   });
 });
 
-// Attach the router to a specific path
-app.use('/api', router);
+}
 
-const PORT = 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+module.exports = initializeWebSocket;
 
-module.exports = router;
 

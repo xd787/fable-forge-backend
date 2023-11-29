@@ -1,10 +1,6 @@
 require('dotenv').config();
 require('./models/connection');
 
-const User = require('./models/user');
-const Genre = require('./models/genre');
-const Story = require('./models/story')
-
 var express = require('express');
 const bodyParser = require('body-parser');
 var path = require('path');
@@ -20,6 +16,17 @@ var app = express();
 const cors = require('cors');
 app.use(bodyParser.json());
 app.use(cors());
+
+
+const http = require("http");
+const initializeWebSocket = require("./routes/api");
+const server = http.createServer(app);
+initializeWebSocket(server); // Initialize WebSocket
+const PORT = 3001;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 
 app.use(logger('dev'));
 app.use(express.json());
