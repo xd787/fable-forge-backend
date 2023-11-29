@@ -5,7 +5,7 @@ const fetch = require("node-fetch");
 const API_KEY = process.env.API_KEY;
 const API_URL = process.env.API_URL;
 
-// POST: Generate a story with all settings (type, style, length)
+
 router.post("/generate-story", async (req, res) => {
   const { type, endingType, length } = req.body;
 
@@ -25,6 +25,14 @@ router.post("/generate-story", async (req, res) => {
   // Initialize variables
   let totalTokens = 0;
   let generatedStory = "";
+
+  //SEND CHUCKS DIRECTLY TO FRONTEND
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  const sendChunk = (chunk) => {
+    res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+  };
 
   // LOOP TOKEN
   while (totalTokens < tokenCount) {
@@ -57,17 +65,14 @@ router.post("/generate-story", async (req, res) => {
 
     try {
       // FETCH API
-      const response = await fetch(
-        API_URL,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${API_KEY}`,
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${API_KEY}`,
+        },
+        body: JSON.stringify(data),
+      });
 
       //REPONSE API
       const responseData = await response.json();
@@ -76,26 +81,32 @@ router.post("/generate-story", async (req, res) => {
       }
       const generatedContent = responseData.choices[0].message.content.trim();
 
+     
       //TOTAL TOKEN COUNT
       totalTokens += generatedContent.length;
       generatedStory += generatedContent;
 
-      // Extraction of the title and response content
+      //TITLE
       const titleRegex = /!(.*?)!/;
       const titleMatch = titleRegex.exec(generatedStory);
       const title = titleMatch ? titleMatch[1] : "";
       const contentWithoutTitle = generatedStory.replace(titleRegex, "");
+      
+      if (!sendChunk.titleSent) {
+        sendChunk(title, contentWithoutTitle); 
+        sendChunk.titleSent = true;
+      }
 
-      //BREAK WHEN DONE 
+      //SEND IN REAL TIME
+      if (sendChunk.titleSent) {
+        sendChunk(generatedContent);
+      }
+
+
+      //WHEN COMPLETED
       if (totalTokens >= tokenCount) {
-        
-        console.log(contentWithoutTitle.length)
-        return res.json({
-          result: "Story generated successfully",
-          title,
-          contentWithoutTitle,
-        });
-       
+        res.end();
+        break;
       }
 
 
