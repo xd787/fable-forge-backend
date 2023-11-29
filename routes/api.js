@@ -1,125 +1,109 @@
 const express = require("express");
 const router = express.Router();
 const fetch = require("node-fetch");
+const socketIo = require('socket.io');
+
 
 const API_KEY = process.env.API_KEY;
 const API_URL = process.env.API_URL;
 
+// Create HTTP server
+const app = express();
+const server = require('http').createServer(app);
 
-router.post("/generate-story", async (req, res) => {
-  const { type, endingType, length } = req.body;
+// Setup Socket.io
+const io = socketIo(server);
 
-  // Longueur d'histoire possible (en token)
-  const LENGTH_MAP = {
-    Courte: { min: 800, max: 1300 },
-    Moyenne: { min: 1500, max: 2000 },
-    Longue: { min: 2000, max: 2500 },
-  };
-  const tokenCount =
-    Math.floor(
-      Math.random() * (LENGTH_MAP[length].max - LENGTH_MAP[length].min + 1)
-    ) + LENGTH_MAP[length].min;
+io.on('connection', (socket) => {
+  console.log('Client connected');
 
-  const prompt = `Je souhaite créer une histoire de genre ${type}. Je veux une ${endingType}.`;
+  socket.on('generate-story', async (data) => {
+    const { type, endingType, length } = data;
 
-  // Initialize variables
-  let totalTokens = 0;
-  let generatedStory = "";
-
-  //SEND CHUCKS DIRECTLY TO FRONTEND
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-  const sendChunk = (chunk) => {
-    res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
-  };
-
-  // LOOP TOKEN
-  while (totalTokens < tokenCount) {
-    const remainingTokens = tokenCount - totalTokens;
-    const maxTokensForChunk = remainingTokens > 250 ? 250 : remainingTokens;
-
-    //MESSAGE BODY API
-    const data = {
-      model: "gpt-3.5-turbo-16k",
-      messages: [
-        {
-          role: "system",
-          content: `
-          Tu es un conteur d'histoires français, avec les consignes suivantes :\n\n-
-          Tu vas créer une seule et unique histoire avec une fin qui ne dépassera pas le nombre maximum de tokens.\n-
-          Tu ne commenceras pas les histoires par \"il était une fois\".\n- 
-          Créer aussi un titre avant le texte de l'histoire que tu mettras entre des balises \"!\".\n-`,
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 1,
-      max_tokens: maxTokensForChunk,
-      top_p: 1,
-      frequency_penalty: 1,
-      presence_penalty: 1,
+    const LENGTH_MAP = {
+      Courte: { min: 800, max: 1300 },
+      Moyenne: { min: 1500, max: 2000 },
+      Longue: { min: 2000, max: 2500 },
     };
+    const tokenCount =
+      Math.floor(
+        Math.random() * (LENGTH_MAP[length].max - LENGTH_MAP[length].min + 1)
+      ) + LENGTH_MAP[length].min;
 
-    try {
-      // FETCH API
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${API_KEY}`,
-        },
-        body: JSON.stringify(data),
-      });
+    const prompt = `Je souhaite créer une histoire de genre ${type}. Je veux une ${endingType}.`;
 
-      //REPONSE API
-      const responseData = await response.json();
-      if (!response.ok || !responseData.choices || !responseData.choices[0]) {
-        res.json({ result: "Erreur lors de la génération de l'histoire" });
-      }
-      const generatedContent = responseData.choices[0].message.content.trim();
+    let totalTokens = 0;
 
-     
-      //TOTAL TOKEN COUNT
-      totalTokens += generatedContent.length;
-      generatedStory += generatedContent;
+    while (totalTokens < tokenCount) {
+      const remainingTokens = tokenCount - totalTokens;
+      const maxTokensForChunk = remainingTokens > 250 ? 250 : remainingTokens;
 
-      //TITLE
-      const titleRegex = /!(.*?)!/;
-      const titleMatch = titleRegex.exec(generatedStory);
-      const title = titleMatch ? titleMatch[1] : "";
-      const contentWithoutTitle = generatedStory.replace(titleRegex, "");
+      const data = {
+        model: "gpt-3.5-turbo-16k",
+        messages: [
+          {
+            role: "system",
+            content: `
+            Tu es un conteur d'histoires français, avec les consignes suivantes :\n\n-
+            Tu vas créer une seule et unique histoire avec une fin qui ne dépassera pas le nombre maximum de tokens.\n-
+            Tu ne commenceras pas les histoires par \"il était une fois\".\n- 
+            Créer aussi un titre avant le texte de l'histoire que tu mettras entre des balises \"!\".\n-`,
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 1,
+        max_tokens: maxTokensForChunk,
+        top_p: 1,
+        frequency_penalty: 1,
+        presence_penalty: 1,
+      };
 
-      if (!sendChunk.titleSent) {
-        sendChunk(title, contentWithoutTitle); 
-        sendChunk.titleSent = true;
-      }
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${API_KEY}`,
+          },
+          body: JSON.stringify(data),
+        });
 
-      //SEND IN REAL TIME
-      if (sendChunk.titleSent) {
-        sendChunk(generatedContent);
-      }
+        const responseData = await response.json();
+        if (!response.ok || !responseData.choices || !responseData.choices[0]) {
+          socket.emit('storyChunk', { result: "Erreur lors de la génération de l'histoire" });
+        }
 
+        const generatedContent = responseData.choices[0].message.content.trim();
 
-      //WHEN COMPLETED
-      if (totalTokens >= tokenCount) {
-        res.end();
+        totalTokens += generatedContent.length;
+        socket.emit('storyChunk', { chunk: generatedContent });
+
+        if (totalTokens >= tokenCount) {
+          socket.emit('storyChunk', { result: "Story generated successfully" });
+          break;
+        }
+      } catch (error) {
+        socket.emit('storyChunk', { error: "Error generating story", details: error.message });
         break;
       }
-
-
-      //CATCH ERROR
-    } catch (error) {
-      // Handle errors during API call
-      return res
-        .status(500)
-        .json({ error: "Error generating story", details: error.message });
     }
-  }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
+
+// Attach the router to a specific path
+app.use('/api', router);
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 module.exports = router;
 
-//TESTE
