@@ -100,7 +100,7 @@ io.on('connection', (socket) => {
 // Attach the router to a specific path
 app.use('/api', router);
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
