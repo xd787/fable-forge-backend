@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const http = require('http')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -18,14 +19,29 @@ app.use(bodyParser.json());
 app.use(cors());
 
 
-const http = require('http');
-const { initializeWebSocket } = require('./routes/api');
-const server = http.createServer(app);
-initializeWebSocket(server); // Pass the HTTP server instance to initializeWebSocket
-const PORT =  3001;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+// CREA WEBSOCKET SERVER 
+const server = http.createServer(app)
+server.listen(8001, function (){
+    console.log('Server running')
+})
+const WebSocket = require ('ws')
+const wss = new WebSocket.Server({server})
+
+//WEBSOCKET API FABLE FORGE 
+const {initializeWebSocket} = require ('./routes/api.js')
+initializeWebSocket(server)
+
+//TEST WEBSOCKET 
+wss.on('connection', function connection(ws){
+    ws.on('error', console.error)
+    ws.on('message', function message(data){
+        console.log('received: %s', data)
+    })
+    ws.send('something')
+})
+
+
 
 
 app.use(logger('dev'));
@@ -37,6 +53,5 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/stories', storiesRouter)
-
 
 module.exports = app;
