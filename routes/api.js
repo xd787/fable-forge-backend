@@ -6,7 +6,8 @@ const API_URL = process.env.API_URL;
 function initializeWebSocket(server) {
   server.on("connection", (socket) => {
     console.log("Client connected");
-    
+ 
+
     socket.on("message", async (data) => {
    
       try {
@@ -148,6 +149,7 @@ function initializeWebSocket(server) {
       console.log("Client disconnected");
     });
   });
+
 }
 
 module.exports = { initializeWebSocket };

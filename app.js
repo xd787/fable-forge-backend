@@ -7,6 +7,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const http = require('http')
+const WebSocket = require ('ws')
+const fs = require('fs');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -19,21 +21,19 @@ app.use(bodyParser.json());
 app.use(cors());
 
 
-
-// CREA WEBSOCKET SERVER 
-const server = http.createServer(app)
-server.listen(8001, function (){
-    console.log('Server running')
-})
-const WebSocket = require ('ws')
-const wss = new WebSocket.Server({server})
-
-//WEBSOCKET API FABLE FORGE 
-const {initializeWebSocket} = require ('./routes/api.js')
-initializeWebSocket(server)
-
-
-
+  // Create an HTTPS server
+  const server = http.createServer(app);
+  
+  // Initialize WebSocket Server over HTTPS
+  const wss = new WebSocket.Server({ server });
+  
+  // Your WebSocket API initialization function
+  const { initializeWebSocket } = require('./routes/api.js');
+  initializeWebSocket(wss);
+  
+  server.listen(8001, () => {
+    console.log('Secure WebSocket server running on port 8001');
+  });
 
 
 app.use(logger('dev'));
