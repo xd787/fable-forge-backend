@@ -104,34 +104,33 @@ function initializeWebSocket(server) {
           const generatedContent =
             responseData.choices[0].message.content.trim();
           const generatedTokens = generatedContent.split(" ").length;
-          tokenGenerated += generatedTokens;
-
+          
           //TITLE
           const titleRegex = /!(.*?)!/;
           const titleMatch = titleRegex.exec(generatedContent);
-          const title = titleMatch ? titleMatch[1] : "No title";
           const contentWithoutTitle = generatedContent.replace(titleRegex, "");
           generatedStory = contentWithoutTitle;
 
           //SEND STORY TO FRONT
-          const chunkData = {
-            type: "storyChunk",
-            data: { chunk: contentWithoutTitle },
-          };
+          let chunkData = {};
 
-          if (title !== "No title" && title) {
-            chunkData.data.title = title;
+          if (tokenGenerated === 0) {
+            chunkData = {
+              type: "storyChunk",
+              data: { chunk: contentWithoutTitle, title: titleMatch[1]},
+            };
+          }else {
+            chunkData = {
+              type: "storyChunk",
+              data: {chunk: contentWithoutTitle},
+            };
           }
+          console.log("tokenGenerated", tokenGenerated, "total", totalTokenCount)
+
+          tokenGenerated += generatedTokens;
           socket.send(JSON.stringify(chunkData));
 
-          console.log(tokenGenerated);
-
-          if (tokenGenerated >= totalTokenCount) {
-            console.log("Story ended");
-            socket.send(JSON.stringify({type:"story ended"}))
-            break;
-          }
-
+    
           // ERROR DE GENERATION
         } catch (error) {
           socket.send(
@@ -142,6 +141,9 @@ function initializeWebSocket(server) {
           );
         }
       }
+      console.log("end of the story")
+      socket.send(JSON.stringify({type: "storyEnd",
+      data: {end:"the end"}}));
     });
 
     // CLIENT DISCONNECTED
