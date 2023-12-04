@@ -125,6 +125,7 @@ function initializeWebSocket(server) {
 
           if (tokenGenerated >= totalTokenCount) {
             console.log("Story ended");
+            socket.send(JSON.stringify({type:"Story ended"}))
             break;
           }
 
