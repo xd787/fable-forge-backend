@@ -28,7 +28,7 @@ function initializeWebSocket(server) {
 
       while (tokenGenerated < totalTokenCount) {
         let remainingTokens = totalTokenCount - tokenGenerated;
-        const maxTokensForChunk = Math.min(remainingTokens, 200);
+        const maxTokensForChunk = remainingTokens > 250 ? 250 : remainingTokens;
 
         //PROMPT
         let prompt = `Je souhaite créer une histoire de genre ${type}. Je veux une ${endingType}.`;
@@ -44,6 +44,9 @@ function initializeWebSocket(server) {
           Tu es un conteur d'histoires français, avec les consignes suivantes :\n\n-
           Tu vas créer une seule et unique histoire avec une fin et qui ne dépassera pas le nombre maximum de tokens.\n-
           Tu ne commenceras pas les histoires par \"il était une fois\".\n- `
+        }
+        if(remainingTokens < 250 ){
+          prompt = `Ecris la fin de l'histoire en respectant le genre ${type} et la ${endingType}: ${generatedStory}`;
         }
 
         //MESSAGE TO API
@@ -125,7 +128,7 @@ function initializeWebSocket(server) {
 
           if (tokenGenerated >= totalTokenCount) {
             console.log("Story ended");
-            socket.send(JSON.stringify({type:"Story ended"}))
+            socket.send(JSON.stringify({type:"story ended"}))
             break;
           }
 
