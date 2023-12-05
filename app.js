@@ -25,7 +25,7 @@ app.use(cors());
   const server = http.createServer(app);
   
   // Initialize WebSocket Server over HTTPS
-  const wss = new WebSocket.Server({server});
+  //const wss = new WebSocket.Server({server});
   
   // Your WebSocket API initialization function
   const { initializeWebSocket } = require('./routes/api.js');
