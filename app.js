@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 
-  // Create an HTTPS server
+  // Créer un serveur HTTP
   const server = http.createServer(app);
   
   // Initialize WebSocket Server over HTTPS
@@ -32,8 +32,9 @@ app.use(cors());
   const { initializeWebSocket } = require('./routes/api.js');
   initializeWebSocket(wss);
   
-  server.listen(8001, () => {
-    console.log('Secure WebSocket server running on port 8001');
+  const port = process.env.PORT || 8001;
+  server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
   });
 
 
