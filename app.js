@@ -22,18 +22,18 @@ app.use(bodyParser.json());
 app.use(cors());
 
   // Créer un serveur HTTP
-  const server = http.createServer(app);
+  // const server = http.createServer(app);
   
   // Initialize WebSocket Server over HTTPS
   //const wss = new WebSocket.Server({server});
   
   // Your WebSocket API initialization function
-  const { initializeWebSocket } = require('./routes/api.js');
-  initializeWebSocket(wss);
+  // const { initializeWebSocket } = require('./routes/api.js');
+  // initializeWebSocket(wss);
   
-  server.listen(8001, () => {
-    console.log('Secure WebSocket server running on port 8001');
-  });
+  // server.listen(8001, () => {
+  //   console.log('Secure WebSocket server running on port 8001');
+  // });
 
 
 //   // Read your SSL certificate and key
