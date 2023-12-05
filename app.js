@@ -32,9 +32,8 @@ app.use(cors());
   const { initializeWebSocket } = require('./routes/api.js');
   initializeWebSocket(wss);
   
-  const port = process.env.PORT || 8001;
-  server.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  server.listen(8001, () => {
+    console.log('Secure WebSocket server running on port 8001');
   });
 
 
