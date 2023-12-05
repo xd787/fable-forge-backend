@@ -21,7 +21,6 @@ const cors = require('cors');
 app.use(bodyParser.json());
 app.use(cors());
 
-
   // Créer un serveur HTTP
   const server = http.createServer(app);
   
@@ -38,24 +37,31 @@ app.use(cors());
 
 
 //   // Read your SSL certificate and key
-// const privateKey = fs.readFileSync('path/to/private-key.pem', 'utf8');
-// const certificate = fs.readFileSync('path/to/certificate.pem', 'utf8');
-// const credentials = { key: privateKey, cert: certificate };
+  // Load the .pfx file
+  const pfxPath = path.join(__dirname, 'certifs', 'certificat-fable-forge.pfx');
+  const pfxFile = fs.readFileSync(pfxPath);
+
+  // Extract the key and certificate from the .pfx file
+  const credentials = {
+  pfx: pfxFile,
+  passphrase: 'fable-forge', // Add passphrase if the .pfx file is encrypted
+  };
 
 // // Create an HTTPS server
-// const httpsServer = https.createServer(credentials, app);
+const httpsServer = https.createServer(credentials, app);
 
 // // Initialize WebSocket Server over HTTPS
-// const wss = new WebSocket.Server({ server: httpsServer });
+const wss = new WebSocket.Server({ server: httpsServer });
 
 // // Your WebSocket API initialization function
-// const { initializeWebSocket } = require('./routes/api.js');
-// initializeWebSocket(wss);
+const { initializeWebSocket } = require('./routes/api.js');
+initializeWebSocket(wss);
 
 // // Start the HTTPS server on port 443 (standard HTTPS port)
-// httpsServer.listen(443, () => {
-//   console.log('Secure WebSocket server running on port 443');
-// });
+const PORT = process.env.PORT || 443; // Port 443 is the standard HTTPS port
+httpsServer.listen(PORT, () => {
+  console.log(`Secure WebSocket server running on port ${PORT}`);
+});
 
 app.use(logger('dev'));
 app.use(express.json());
