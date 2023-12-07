@@ -28,6 +28,14 @@ const wss = new WebSocket.Server({server});
 // Your WebSocket API initialization function
 const { initializeWebSocket } = require('./routes/api.js');
 initializeWebSocket(wss);
+  
+// Déterminer le port à utiliser
+const PORT = process.env.PORT || 8001;
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 
 app.use(logger('dev'));
 app.use(express.json());
