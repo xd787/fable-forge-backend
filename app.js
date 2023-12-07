@@ -27,24 +27,28 @@ const pfxFile = fs.readFileSync(pfxPath);
 
 // Extract the key and certificate from the .pfx file
 const credentials = {
-pfx: pfxFile,
-passphrase: 'fable-forge', // Add passphrase if the .pfx file is encrypted
+  pfx: pfxFile,
+  passphrase: 'fable-forge', // Add passphrase if the .pfx file is encrypted
 };
 
 // Create an HTTPS server
 const httpsServer = https.createServer(credentials, app);
 
-// Initialize WebSocket Server over HTTPS
-const wss = new WebSocket.Server({ server: httpsServer });
-
-// Your WebSocket API initialization function
-const { initializeWebSocket } = require('./routes/api.js');
-initializeWebSocket(wss);
-
-// // Start the HTTPS server on port 443 (standard HTTPS port)
-const PORT = process.env.PORT || 8001; // Port 443 is the standard HTTPS port
+// Start the HTTPS server on port 443 (standard HTTPS port)
+const PORT = process.env.PORT || 443; // Port 443 is the standard HTTPS port
 httpsServer.listen(PORT, () => {
   console.log(`Secure WebSocket server running on port ${PORT}`);
+
+  // Initialize WebSocket Server over HTTPS
+  const wss = new WebSocket.Server({ server: httpsServer });
+
+  wss.on('connection', ws => {
+    ws.on('message', message => {
+      console.log(`Received message => ${message}`);
+    });
+
+    ws.send('Hello! Message From Server!!');
+  });
 });
 
 app.use(logger('dev'));
