@@ -6,31 +6,35 @@ const bodyParser = require('body-parser');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const http = require('http')
-const WebSocket = require ('ws')
+const http = require('http');
+const WebSocket = require('ws');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-const storiesRouter = require('./routes/stories')
+const storiesRouter = require('./routes/stories');
 
 var app = express();
 const cors = require('cors');
 app.use(bodyParser.json());
 app.use(cors());
 
-
 // Créer un serveur HTTP
 const server = http.createServer(app);
-  
-// Initialize WebSocket Server over HTTPS
+
+// Initialize WebSocket Server over HTTP
 const wss = new WebSocket.Server({ server });
-  
+
 // Your WebSocket API initialization function
 const { initializeWebSocket } = require('./routes/api.js');
 initializeWebSocket(wss);
-  
- // Utiliser le port fourni par l'environnement, sinon 8001 par défaut
+
+// Utiliser le port fourni par l'environnement, sinon 8001 par défaut
 const PORT = process.env.PORT || 8001;
+
+// Log pour vérifier la valeur du PORT
+console.log(`Valeur de la variable d'environnement PORT: ${process.env.PORT}`);
+console.log(`Le serveur va écouter sur le port: ${PORT}`);
+
 server.listen(PORT, () => {
   console.log(`Secure WebSocket server running on port ${PORT}`);
 });
@@ -43,6 +47,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/stories', storiesRouter)
+app.use('/stories', storiesRouter);
 
 module.exports = app;
