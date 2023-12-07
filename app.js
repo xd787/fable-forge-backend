@@ -1,4 +1,3 @@
-APP.JS (BACKEND)
 require('dotenv').config();
 require('./models/connection');
 
