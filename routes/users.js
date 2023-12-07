@@ -9,12 +9,12 @@ const bcrypt = require("bcrypt");
 
 // POST INSCRIPTION
 router.post("/signup", (req, res) => {
-  if (!checkBody(req.body, ["username", "password"])) {
+  if (!checkBody(req.body, ["username", "password", "email", "firstname"])) {
     res.json({ result: false, error: "Missing or empty fields" });
     return;
   }
   // Check if the user does not already exist in data base
-  User.findOne({ username: req.body.username }).then(data => {
+  User.findOne({ "$or": [ { email: req.body.email }, { username: req.body.username} ] }).then(data => {
     if (data === null) {
       const hash = bcrypt.hashSync(req.body.password, 10);
 
@@ -40,8 +40,11 @@ router.post("/signup", (req, res) => {
         res.json({ result: true, token: newDoc.token });
       });
     } else {
-      // User already exists in database
-      res.json({ result: false, error: "User already exists" });
+      if(data.email === req.body.email){
+        res.json({ result: false, error: "Email already exists" });
+      }else if (data.username === req.body.username){
+        res.json({ result: false, error: "Username already exists" });
+      }  
     }
   });
 });
