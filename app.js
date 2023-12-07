@@ -19,7 +19,6 @@ const cors = require('cors');
 app.use(bodyParser.json());
 app.use(cors());
 
-
 // Créer un serveur HTTP
 const server = http.createServer(app);
   
@@ -36,6 +35,7 @@ const PORT = process.env.PORT || 8001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
 
 app.use(logger('dev'));
 app.use(express.json());
