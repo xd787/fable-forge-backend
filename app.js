@@ -48,7 +48,7 @@ app.use(cors());
   };
 
 // // Create an HTTPS server
-const httpsServer = https.createServer(credentials, app);
+const httpsServer = http.createServer(credentials, app);
 
 // // Initialize WebSocket Server over HTTPS
 const wss = new WebSocket.Server({ server: httpsServer });
