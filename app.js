@@ -6,38 +6,54 @@ const bodyParser = require('body-parser');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const http = require('http');
-const WebSocket = require('ws');
+const http = require('http')
+const WebSocket = require ('ws')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-const storiesRouter = require('./routes/stories');
+const storiesRouter = require('./routes/stories')
+
 
 var app = express();
 const cors = require('cors');
 app.use(bodyParser.json());
 app.use(cors());
 
-// Créer un serveur HTTP
-const server = http.createServer(app);
 
-// Initialize WebSocket Server over HTTP
-const wss = new WebSocket.Server({ server });
+  // Créer un serveur HTTP
+  const server = http.createServer(app);
+  
+  // Initialize WebSocket Server over HTTPS
+  const wss = new WebSocket.Server({server});
+  
+  // Your WebSocket API initialization function
+  const { initializeWebSocket } = require('./routes/api.js');
+  initializeWebSocket(wss);
+  
+  server.listen(8001, () => {
+    console.log('Secure WebSocket server running on port 8001');
+  });
 
-// Your WebSocket API initialization function
-const { initializeWebSocket } = require('./routes/api.js');
-initializeWebSocket(wss);
 
-// Utiliser le port fourni par l'environnement, sinon 8001 par défaut
-const PORT = process.env.PORT || 8001;
+//   // Read your SSL certificate and key
+// const privateKey = fs.readFileSync('path/to/private-key.pem', 'utf8');
+// const certificate = fs.readFileSync('path/to/certificate.pem', 'utf8');
+// const credentials = { key: privateKey, cert: certificate };
 
-// Log pour vérifier la valeur du PORT
-console.log(`Valeur de la variable d'environnement PORT: ${process.env.PORT}`);
-console.log(`Le serveur va écouter sur le port: ${PORT}`);
+// // Create an HTTPS server
+// const httpsServer = https.createServer(credentials, app);
 
-server.listen(PORT, () => {
-  console.log(`Secure WebSocket server running on port ${PORT}`);
-});
+// // Initialize WebSocket Server over HTTPS
+// const wss = new WebSocket.Server({ server: httpsServer });
+
+// // Your WebSocket API initialization function
+// const { initializeWebSocket } = require('./routes/api.js');
+// initializeWebSocket(wss);
+
+// // Start the HTTPS server on port 443 (standard HTTPS port)
+// httpsServer.listen(443, () => {
+//   console.log('Secure WebSocket server running on port 443');
+// });
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -47,6 +63,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/stories', storiesRouter);
+app.use('/stories', storiesRouter)
 
 module.exports = app;
