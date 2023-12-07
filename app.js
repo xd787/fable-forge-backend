@@ -58,7 +58,7 @@ const { initializeWebSocket } = require('./routes/api.js');
 initializeWebSocket(wss);
 
 // // Start the HTTPS server on port 443 (standard HTTPS port)
-const PORT = process.env.PORT || 443; // Port 443 is the standard HTTPS port
+const PORT = 443; // Port 443 is the standard HTTPS port
 httpsServer.listen(PORT, () => {
   console.log(`Secure WebSocket server running on port ${PORT}`);
 });
