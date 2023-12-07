@@ -20,19 +20,22 @@ app.use(bodyParser.json());
 app.use(cors());
 
 
-  // Créer un serveur HTTP
-  const server = http.createServer(app);
+// Créer un serveur HTTP
+const server = http.createServer(app);
   
-  // Initialize WebSocket Server over HTTPS
-  const wss = new WebSocket.Server({server});
+// Initialize WebSocket Server over HTTPS
+const wss = new WebSocket.Server({server});
   
-  // Your WebSocket API initialization function
-  const { initializeWebSocket } = require('./routes/api.js');
-  initializeWebSocket(wss);
+// Your WebSocket API initialization function
+const { initializeWebSocket } = require('./routes/api.js');
+initializeWebSocket(wss);
   
-  server.listen(8001, () => {
-    console.log('Secure WebSocket server running on port 8001');
-  });
+// Déterminer le port à utiliser
+const PORT = process.env.PORT || 8001;
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 app.use(logger('dev'));
 app.use(express.json());
