@@ -23,24 +23,24 @@ app.use(cors());
 // Créer un serveur HTTP
 const server = http.createServer(app);
   
-// // Initialize WebSocket Server over HTTPS
-// const wss = new WebSocket.Server({server});
+// Initialize WebSocket Server over HTTPS
+const wss = new WebSocket.Server({server});
   
-// // Your WebSocket API initialization function
-// const { initializeWebSocket } = require('./routes/api.js');
-// initializeWebSocket(wss);
+// Your WebSocket API initialization function
+const { initializeWebSocket } = require('./routes/api.js');
+initializeWebSocket(wss);
   
 
 // SOCKET IO 
-const io = socketIO(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
+// const io = socketIO(server, {
+//   cors: {
+//     origin: "*",
+//     methods: ["GET", "POST"],
+//   },
+// });
 
-const {socketInitiation} = require ('./routes/socket.js')
-socketInitiation(io)
+// const {socketInitiation} = require ('./routes/socket.js')
+// socketInitiation(io)
 
 
 
