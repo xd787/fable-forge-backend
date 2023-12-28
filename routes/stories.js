@@ -90,4 +90,48 @@ router.get("/:id", (req, res) => {
     });
 });
 
+// TEST PERSONNAGE 
+// Endpoint pour recevoir les données du frontend
+router.post('/persoCharacter', async (req, res) => {
+  try {
+    const { selectedType, endingType } = req.body;
+
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        type: selectedType,
+        endingType: endingType,
+      }),
+    });
+
+    const responseData = await response.json();
+
+    // Extraction des données des personnages
+    const characters = extractCharacterInfo(responseData.choices[0].message.content);
+
+    // Envoi des données extraites vers le frontend
+    res.status(200).json({ success: true, characters });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Fonction pour extraire les données des personnages
+const extractCharacterInfo = (apiResponse) => {
+  const characterInfo = [];
+  const regex = /Prénom : (\w+)\n2 Traits de caractère : (\w+), (\w+)\nCourte Description : (.+?)\n\n/g;
+  let match;
+
+  while ((match = regex.exec(apiResponse)) !== null) {
+    const [, firstName, trait1, trait2, description] = match;
+    characterInfo.push({ firstName, traits: [trait1, trait2], description });
+  }
+
+  return characterInfo;
+};
+
 module.exports = router;
