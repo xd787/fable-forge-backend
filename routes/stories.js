@@ -141,16 +141,18 @@ router.post('/persoCharacter', async (req, res) => {
 const extractCharacterInfo = (responseData) => {
   const characterInfo = [];
 
-  if (responseData && responseData.choices && responseData.choices.length > 0) {
-    const charactersData = responseData.choices[0].message.content.split('\n\n');
-    charactersData.forEach((character) => {
-      const traits = character.match(/2 Traits de caractère : (\w+), (\w+)/);
-      const description = character.match(/Courte Description : (.+)/);
+  if (responseData && responseData.characters && responseData.characters.length > 0) {
+    responseData.characters.forEach((character) => {
+      const description = character.description;
+      const traits = character.traits;
+
+      // Ajout de la logique pour extraire le prénom
+      const firstNameRegex = /(\w+) est/;
+      const matchFirstName = description.match(firstNameRegex);
+      const firstName = matchFirstName ? matchFirstName[1] : "Nom inconnu";
 
       if (traits && description) {
-        const [_, trait1, trait2] = traits;
-        const [, characterDescription] = description;
-        characterInfo.push({ traits: [trait1, trait2], description: characterDescription });
+        characterInfo.push({ firstName, traits, description });
       }
     });
   }
