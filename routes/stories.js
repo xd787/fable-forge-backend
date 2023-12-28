@@ -98,46 +98,52 @@ router.get("/:id", (req, res) => {
 // Endpoint pour recevoir les données du frontend
 router.post('/persoCharacter', async (req, res) => {
   try {
+    // Extraire les données de la requête
     const { selectedType, endingType } = req.body;
 
-    console.log('Request to external API:', selectedType, endingType);
+    // Construire la requête vers l'API externe
+    const messageAPI = {
+      model: "gpt-3.5-turbo-16k",
+      messages: [
+        {
+          role: "user",
+          content: `Créer deux personnages pour une histoire de ${selectedType} avec une ${endingType} sans raconter leur histoire. Pour chaque personnage :\n\nPersonnage 1 :\nPrénom :\n2 Traits de caractère :\nCourte Description :\n\nPersonnage 2 :\nPrénom :\n2 Traits de caractère :\nCourte Description :`
+        }
+      ],
+      max_tokens: 400
+    };
 
+    // Envoi de la requête à l'API externe
     const response = await fetch(API_URL, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${API_KEY}`,
       },
-      body: JSON.stringify({
-        type: selectedType,
-        endingType: endingType,
-      }),
+      body: JSON.stringify(messageAPI),
     });
 
+    // Traitement de la réponse de l'API externe
     const responseData = await response.json();
 
-    console.log('Response from external API:', responseData);
-
     // Extraction des données des personnages
-    const characters = extractCharacterInfo(responseData.choices[0].message.content);
+    const characters = extractCharacterInfo(responseData);
 
-    console.log('characters:', characters); // Ajout du log pour afficher les personnages extraits
-
-    // Envoi des données extraites vers le frontend
+    // Envoyer les données extraites vers le frontend
     res.status(200).json({ success: true, characters });
   } catch (error) {
-    console.error('Error:', error.message); // Ajout du log pour afficher les erreurs
+    console.error('Error:', error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
 // Fonction pour extraire les données des personnages
-const extractCharacterInfo = (apiResponse) => {
+const extractCharacterInfo = (responseData) => {
   const characterInfo = [];
-  
-  if (apiResponse && apiResponse.choices && apiResponse.choices.length > 0) {
-    const characters = apiResponse.choices[0].message.content.split('\n\n');
-    characters.forEach((character) => {
+
+  if (responseData && responseData.choices && responseData.choices.length > 0) {
+    const charactersData = responseData.choices[0].message.content.split('\n\n');
+    charactersData.forEach((character) => {
       const traits = character.match(/2 Traits de caractère : (\w+), (\w+)/);
       const description = character.match(/Courte Description : (.+)/);
 
