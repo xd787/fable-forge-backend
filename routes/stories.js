@@ -117,7 +117,7 @@ router.post('/persoCharacter', async (req, res) => {
     const responseData = await response.json();
 
     console.log('Response from external API:', responseData);
-    
+
     // Extraction des données des personnages
     const characters = extractCharacterInfo(responseData.choices[0].message.content);
 
@@ -134,12 +134,19 @@ router.post('/persoCharacter', async (req, res) => {
 // Fonction pour extraire les données des personnages
 const extractCharacterInfo = (apiResponse) => {
   const characterInfo = [];
-  const regex = /Prénom : (\w+)\n2 Traits de caractère : (\w+), (\w+)\nCourte Description : (.+?)\n\n/g;
-  let match;
+  
+  if (apiResponse && apiResponse.choices && apiResponse.choices.length > 0) {
+    const characters = apiResponse.choices[0].message.content.split('\n\n');
+    characters.forEach((character) => {
+      const traits = character.match(/2 Traits de caractère : (\w+), (\w+)/);
+      const description = character.match(/Courte Description : (.+)/);
 
-  while ((match = regex.exec(apiResponse)) !== null) {
-    const [, firstName, trait1, trait2, description] = match;
-    characterInfo.push({ firstName, traits: [trait1, trait2], description });
+      if (traits && description) {
+        const [_, trait1, trait2] = traits;
+        const [, characterDescription] = description;
+        characterInfo.push({ traits: [trait1, trait2], description: characterDescription });
+      }
+    });
   }
 
   return characterInfo;
