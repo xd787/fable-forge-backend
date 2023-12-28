@@ -100,8 +100,7 @@ router.post('/persoCharacter', async (req, res) => {
   try {
     const { selectedType, endingType } = req.body;
 
-    console.log('selectedType:', selectedType);
-    console.log('endingType:', endingType);
+    console.log('Request to external API:', selectedType, endingType);
 
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -117,8 +116,8 @@ router.post('/persoCharacter', async (req, res) => {
 
     const responseData = await response.json();
 
-    console.log('responseData:', responseData); // Ajout du log pour afficher la réponse de l'API externe
-
+    console.log('Response from external API:', responseData);
+    
     // Extraction des données des personnages
     const characters = extractCharacterInfo(responseData.choices[0].message.content);
 
