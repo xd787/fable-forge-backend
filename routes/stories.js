@@ -5,6 +5,10 @@ const Stories = require("../models/story");
 const User = require("../models/user");
 const uid2 = require("uid2");
 
+const fetch = require("node-fetch");
+const API_KEY = process.env.API_KEY;
+const API_URL = process.env.API_URL;
+
 //DELETE histoire selon l’ID de l’histoire
 router.delete("/:storyID", (req, res) => {
   Stories.deleteOne({ _id: req.params.storyID }).then(deletedDoc => {
