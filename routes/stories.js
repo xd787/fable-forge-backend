@@ -96,6 +96,9 @@ router.post('/persoCharacter', async (req, res) => {
   try {
     const { selectedType, endingType } = req.body;
 
+    console.log('selectedType:', selectedType);
+    console.log('endingType:', endingType);
+
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
@@ -110,12 +113,17 @@ router.post('/persoCharacter', async (req, res) => {
 
     const responseData = await response.json();
 
+    console.log('responseData:', responseData); // Ajout du log pour afficher la réponse de l'API externe
+
     // Extraction des données des personnages
     const characters = extractCharacterInfo(responseData.choices[0].message.content);
+
+    console.log('characters:', characters); // Ajout du log pour afficher les personnages extraits
 
     // Envoi des données extraites vers le frontend
     res.status(200).json({ success: true, characters });
   } catch (error) {
+    console.error('Error:', error.message); // Ajout du log pour afficher les erreurs
     res.status(500).json({ success: false, error: error.message });
   }
 });
