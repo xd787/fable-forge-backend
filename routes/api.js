@@ -4,12 +4,12 @@ const API_URL = process.env.API_URL;
 
 function initializeWebSocket(server) {
   server.on("connection", (socket) => {
-    console.log("Client connected");
+    console.log("Client API connected");
 
     socket.on("message", async (data) => {
       // RECEPTION DATA
       const parsedData = JSON.parse(data);
-      const { type, endingType, length } = parsedData.data;
+      const { type, endingType, length, selectedCharacter } = parsedData.data;
 
       //CALCULE LENGTH STORY
       const LENGTH_MAP = {
@@ -31,10 +31,10 @@ function initializeWebSocket(server) {
         const maxTokensForChunk = remainingTokens > 250 ? 250 : remainingTokens;
 
         //PROMPT
-        let prompt = `Je souhaite créer une histoire de genre ${type}. Je veux une ${endingType}.`;
+        let prompt = `Je souhaite créer une histoire de genre ${type}. Je veux une ${endingType}. Tu dois forcément intégrer ce personnage ${selectedCharacter} à l'histoire`;
         let apiMessage = `
         Tu es un conteur d'histoires français, avec les consignes suivantes :\n\n-
-        Tu vas créer une seule et unique histoire avec une fin et qui ne dépassera pas le nombre maximum de tokens.\n-
+        Tu vas créer une seule et unique histoire avec une fin qui ne dépassera pas le nombre maximum de tokens.\n-
         Tu ne commenceras pas les histoires par \"il était une fois\".\n- 
         Créer aussi un titre avant le texte de l'histoire que tu mettras entre des balises \"!\".\n-`
 
@@ -42,7 +42,7 @@ function initializeWebSocket(server) {
           prompt = `Continues la suite de l'histoire en respectant le genre ${type} et la ${endingType}: ${generatedStory}`;
           apiMessage = `
           Tu es un conteur d'histoires français, avec les consignes suivantes :\n\n-
-          Tu vas créer une seule et unique histoire avec une fin et qui ne dépassera pas le nombre maximum de tokens.\n-
+          Tu vas créer une seule et unique histoire avec une fin qui ne dépassera pas le nombre maximum de tokens.\n-
           Tu ne commenceras pas les histoires par \"il était une fois\".\n- `
         }
         if(remainingTokens < 250 ){
