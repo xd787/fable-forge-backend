@@ -31,7 +31,7 @@ function initializeWebSocket(server) {
         const maxTokensForChunk = remainingTokens > 250 ? 250 : remainingTokens;
 
         //PROMPT
-        let prompt = `Je souhaite créer une histoire de genre ${type}. Je veux une ${endingType}. Tu dois forcément intégrer ce personnage ${selectedCharacter} à l'histoire`;
+        let prompt = `Je souhaite créer une histoire de genre ${type}, avec une ${endingType}. Le personnage principal est ${selectedCharacter.firstName}, qui se distingue par les traits suivants : ${selectedCharacter.traits.join(", ")}. ${selectedCharacter.firstName} est également connu(e) pour ${selectedCharacter.description}.`;
         let apiMessage = `
         Tu es un conteur d'histoires français, avec les consignes suivantes :\n\n-
         Tu vas créer une seule et unique histoire avec une fin qui ne dépassera pas le nombre maximum de tokens.\n-
