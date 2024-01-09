@@ -107,7 +107,7 @@ router.post('/persoCharacter', async (req, res) => {
       messages: [
         {
           role: "user",
-          content: `Créer deux personnages pour une histoire de ${selectedType} avec une ${endingType} sans raconter leur histoire. Pour chaque personnage :\n\nPersonnage 1 :\nPrénom :\n2 Traits de caractère :\nCourte Description :\n\nPersonnage 2 :\nPrénom :\n2 Traits de caractère :\nCourte Description :`
+          content: `Tu dois obligatoirement inventer deux personnages pour une histoire de ${selectedType} avec une ${endingType} sans raconter leur histoire. Pour chaque personnage :\n\nPersonnage 1 :\nPrénom :\n2 Traits de caractère :\nCourte Description :\n\nPersonnage 2 :\nPrénom :\n2 Traits de caractère :\nCourte Description :`
         }
       ],
       max_tokens: 400
